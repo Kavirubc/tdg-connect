@@ -12,6 +12,7 @@ export default function RegisterPage() {
     interests: '',
     facts: '',
   });
+  const [interestTags, setInterestTags] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const router = useRouter();
@@ -19,6 +20,19 @@ export default function RegisterPage() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleInterestsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setFormData((prev) => ({ ...prev, interests: value }));
+
+    // Split by spaces to create tags
+    if (value.trim()) {
+      const tags = value.split(' ').filter(tag => tag.trim() !== '');
+      setInterestTags(tags);
+    } else {
+      setInterestTags([]);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -30,7 +44,7 @@ export default function RegisterPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...formData,
-          interests: formData.interests.split(','),
+          interests: interestTags.length > 0 ? interestTags : formData.interests.split(' '),
           facts: formData.facts.split(','),
         }),
       });
@@ -88,7 +102,7 @@ export default function RegisterPage() {
               placeholder="Enter your full name"
               value={formData.name}
               onChange={handleChange}
-              className="w-full p-3 border border-[#e6d7c4] rounded-lg focus:ring-2 focus:ring-[#7bb5d3] focus:border-[#7bb5d3]"
+              className="w-full p-3 border border-[#e6d7c4] rounded-lg focus:ring-2 focus:ring-[#7bb5d3] focus:border-[#7bb5d3] text-[#333333] placeholder:text-[#aaaaaa]"
               required
             />
           </div>
@@ -104,7 +118,7 @@ export default function RegisterPage() {
               placeholder="you@example.com"
               value={formData.email}
               onChange={handleChange}
-              className="w-full p-3 border border-[#e6d7c4] rounded-lg focus:ring-2 focus:ring-[#7bb5d3] focus:border-[#7bb5d3]"
+              className="w-full p-3 border border-[#e6d7c4] rounded-lg focus:ring-2 focus:ring-[#7bb5d3] focus:border-[#7bb5d3] text-[#333333] placeholder:text-[#aaaaaa]"
               required
             />
           </div>
@@ -120,7 +134,7 @@ export default function RegisterPage() {
               placeholder="Create a password"
               value={formData.password}
               onChange={handleChange}
-              className="w-full p-3 border border-[#e6d7c4] rounded-lg focus:ring-2 focus:ring-[#7bb5d3] focus:border-[#7bb5d3]"
+              className="w-full p-3 border border-[#e6d7c4] rounded-lg focus:ring-2 focus:ring-[#7bb5d3] focus:border-[#7bb5d3] text-[#333333] placeholder:text-[#aaaaaa]"
               required
             />
           </div>
@@ -129,16 +143,26 @@ export default function RegisterPage() {
             <label htmlFor="interests" className="block text-sm font-medium text-[#555555] mb-1">
               Your Interests
             </label>
-            <textarea
+            <input
               id="interests"
+              type="text"
               name="interests"
-              placeholder="Tech, Sports, Art, etc. (comma-separated)"
+              placeholder="Add interests separated by spaces"
               value={formData.interests}
-              onChange={handleChange}
-              className="w-full p-3 border border-[#e6d7c4] rounded-lg focus:ring-2 focus:ring-[#7bb5d3] focus:border-[#7bb5d3]"
-              rows={2}
+              onChange={handleInterestsChange}
+              className="w-full p-3 border border-[#e6d7c4] rounded-lg focus:ring-2 focus:ring-[#7bb5d3] focus:border-[#7bb5d3] text-[#333333] placeholder:text-[#aaaaaa]"
             />
-            <p className="mt-1 text-xs text-[#777777]">Separate with commas, e.g. "Reading, Hiking, Technology"</p>
+            <p className="mt-1 text-xs text-[#777777]">Type each interest and press space to separate them</p>
+
+            {interestTags.length > 0 && (
+              <div className="flex flex-wrap gap-2 mt-2">
+                {interestTags.map((tag, index) => (
+                  <span key={index} className="px-2 py-1 bg-[#e6f2ff] text-[#4a86e8] rounded-full text-sm">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
 
           <div>
@@ -151,7 +175,7 @@ export default function RegisterPage() {
               placeholder="I love coffee, I've visited 10 countries, etc."
               value={formData.facts}
               onChange={handleChange}
-              className="w-full p-3 border border-[#e6d7c4] rounded-lg focus:ring-2 focus:ring-[#7bb5d3] focus:border-[#7bb5d3]"
+              className="w-full p-3 border border-[#e6d7c4] rounded-lg focus:ring-2 focus:ring-[#7bb5d3] focus:border-[#7bb5d3] text-[#333333] placeholder:text-[#aaaaaa]"
               rows={2}
             />
             <p className="mt-1 text-xs text-[#777777]">Separate with commas</p>
