@@ -12,7 +12,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "TDG Connect - Community App",
+  title: "TDG Connect - Community App by Kaviru H",
   description: "Connect with people in your community",
 };
 
@@ -55,7 +55,7 @@ export default async function RootLayout({
         </main>
         <footer className="py-6 bg-[#e6d7c4] text-[#333333]">
           <div className="container mx-auto max-w-6xl px-4 text-center text-sm">
-            <p>© {new Date().getFullYear()} TDG Connect - Building communities together</p>
+            <p>© {new Date().getFullYear()} <Link href="https://kaviru.cc">Kaviru H | TDG Connect - Building communities together</Link></p>
           </div>
         </footer>
       </body>
