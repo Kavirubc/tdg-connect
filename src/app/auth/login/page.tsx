@@ -1,20 +1,21 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, ChangeEvent, FormEvent } from 'react';
 import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 export default function LoginPage() {
   const [formData, setFormData] = useState({ email: '', password: '' });
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
-  const handleChange = (e) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null);
     const result = await signIn('credentials', {
@@ -25,7 +26,7 @@ export default function LoginPage() {
     if (result?.error) {
       setError(result.error);
     } else {
-      router.push('/');
+      router.push('/connections');
     }
   };
 
@@ -58,6 +59,9 @@ export default function LoginPage() {
         >
           Login
         </button>
+        <div className="text-center mt-4">
+          Don&apos;t have an account? <Link href="/auth/register" className="text-blue-500 hover:underline">Register here</Link>
+        </div>
       </form>
     </div>
   );

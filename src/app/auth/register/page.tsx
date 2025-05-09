@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState({
@@ -11,15 +12,16 @@ export default function RegisterPage() {
     interests: '',
     facts: '',
   });
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
   const router = useRouter();
 
-  const handleChange = (e) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null);
     try {
@@ -34,9 +36,18 @@ export default function RegisterPage() {
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Registration failed');
-      router.push('/auth/login');
+
+      setSuccess(true);
+      // Redirect to login page after a brief delay
+      setTimeout(() => {
+        router.push('/auth/login');
+      }, 2000);
     } catch (err) {
-      setError(err.message);
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('An unknown error occurred');
+      }
     }
   };
 
@@ -45,6 +56,7 @@ export default function RegisterPage() {
       <form onSubmit={handleSubmit} className="w-full max-w-md space-y-4">
         <h1 className="text-2xl font-bold">Register</h1>
         {error && <p className="text-red-500">{error}</p>}
+        {success && <p className="text-green-500">Registration successful! Redirecting...</p>}
         <input
           type="text"
           name="name"
@@ -92,6 +104,9 @@ export default function RegisterPage() {
         >
           Register
         </button>
+        <div className="text-center mt-4">
+          Already have an account? <Link href="/auth/login" className="text-blue-500 hover:underline">Login here</Link>
+        </div>
       </form>
     </div>
   );

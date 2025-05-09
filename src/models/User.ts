@@ -1,4 +1,4 @@
-import mongoose, { Schema, models, model } from 'mongoose';
+import { Schema, models, model } from 'mongoose';
 
 const UserSchema = new Schema({
     name: { type: String, required: true },
@@ -7,6 +7,10 @@ const UserSchema = new Schema({
     code: { type: String, required: true, unique: true }, // 4-digit code
     interests: { type: [String], default: [] },
     facts: { type: [String], default: [] },
+    connections: [{
+        user: { type: Schema.Types.ObjectId, ref: 'User' },
+        isDisconnected: { type: Boolean, default: false }
+    }],
 }, { timestamps: true });
 
 export default models.User || model('User', UserSchema);

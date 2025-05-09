@@ -1,9 +1,9 @@
-import { NextResponse } from 'next/server';
+import { NextResponse, NextRequest } from 'next/server';
 import bcrypt from 'bcryptjs';
 import User from '@/models/User';
 import { connectToDatabase } from '@/lib/mongodb';
 
-function generateUniqueCode(existingCodes) {
+function generateUniqueCode(existingCodes: string[]) {
     let code;
     do {
         code = Math.floor(1000 + Math.random() * 9000).toString(); // Generate 4-digit code
@@ -11,7 +11,7 @@ function generateUniqueCode(existingCodes) {
     return code;
 }
 
-export async function POST(req) {
+export async function POST(req: NextRequest) {
     try {
         await connectToDatabase();
         const { name, email, password, interests, facts } = await req.json();
