@@ -3,19 +3,12 @@ import { getServerSession } from 'next-auth/next';
 import User from '@/models/User';
 import { connectToDatabase } from '@/lib/mongodb';
 import { authOptions } from '@/lib/auth';
+import OpenAI from 'openai';
 
-const conversationStarters = [
-    "What is your favorite hobby and why?",
-    "If you could travel anywhere in the world, where would you go?",
-    "What is a skill you'd like to learn or improve?",
-    "What is your favorite book or movie and what do you love about it?",
-    "What is something you're passionate about?",
-    "What is a goal you're currently working towards?",
-    "What is your favorite type of music?",
-    "If you could have any superpower, what would it be?",
-    "What is your favorite way to relax and unwind?",
-    "What is something that always makes you laugh?"
-];
+// Initialize OpenAI client
+const openai = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+});
 
 export async function GET() {
     try {
@@ -42,24 +35,141 @@ export async function GET() {
         const randomConnection = activeConnections[Math.floor(Math.random() * activeConnections.length)];
         const connectionUser = randomConnection.user; // This is the populated user object
 
-        // Get a random conversation starter
-        const randomStarter = conversationStarters[Math.floor(Math.random() * conversationStarters.length)];
+        // Prepare context for OpenAI prompt
+        let prompt = `Generate a brief conversation starter question (5-20 words) for ${connectionUser.name}`;
 
-        // Personalize the starter if possible
-        let personalizedStarter = `Ask ${connectionUser.name}: ${randomStarter}`;
+        // Add interests to the prompt if available
+        if (connectionUser.interests && connectionUser.interests.length > 0) {
+            prompt += ` based on their interests: ${connectionUser.interests.join(', ')}`;
+        }
 
-        // Example of further personalization based on shared interests (if available)
+        // Add shared interests if available
         if (user.interests && connectionUser.interests) {
-            const commonInterests = user.interests.filter((interest: string) => connectionUser.interests.includes(interest));
+            const commonInterests = user.interests.filter((interest: string) =>
+                connectionUser.interests.includes(interest)
+            );
+
             if (commonInterests.length > 0) {
-                personalizedStarter += ` You both like ${commonInterests.join(', ')}.`;
+                prompt += `. Include a reference to your shared interests: ${commonInterests.join(', ')}`;
             }
         }
 
-        return NextResponse.json({ starter: personalizedStarter, connectionName: connectionUser.name });
+        // Generate the conversation starter using OpenAI
+        const completion = await openai.chat.completions.create({
+            model: "gpt-4o-mini",
+            messages: [
+                {
+                    role: "system",
+                    content: "You generate brief, engaging conversation starters between 5-20 words. Make them personal and specific to the recipient's interests."
+                },
+                {
+                    role: "user",
+                    content: prompt
+                }
+            ],
+            max_tokens: 50,
+            temperature: 0.7,
+        });
+
+        // Get the generated starter
+        const generatedStarter = completion.choices[0]?.message?.content?.trim() || "How's your day going?";
+
+        // Format the final starter
+        const personalizedStarter = `Ask ${connectionUser.name}: ${generatedStarter}`;
+
+        return NextResponse.json({
+            starter: personalizedStarter,
+            connectionName: connectionUser.name
+        });
 
     } catch (error) {
-        console.error("Error fetching conversation starter:", error);
+        console.error("Error generating conversation starter:", error);
+        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    }
+}
+
+export async function POST(request: Request) {
+    try {
+        const session = await getServerSession(authOptions);
+        if (!session?.user?.id) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
+        await connectToDatabase();
+
+        // Get the connectionId from the request body
+        const { connectionId } = await request.json();
+
+        if (!connectionId) {
+            return NextResponse.json({ error: 'Connection ID is required' }, { status: 400 });
+        }
+
+        // Find the user and populate their connections
+        const user = await User.findById(session.user.id).populate('connections.user');
+
+        if (!user) {
+            return NextResponse.json({ error: 'User not found' }, { status: 404 });
+        }
+
+        // Find the specific connection
+        const connection = user.connections.find(
+            (conn: any) => conn.user._id.toString() === connectionId && !conn.isDisconnected
+        );
+
+        if (!connection) {
+            return NextResponse.json({ error: 'Connection not found or inactive' }, { status: 404 });
+        }
+
+        const connectionUser = connection.user;
+
+        // Prepare context for OpenAI prompt
+        let prompt = `Generate a brief conversation starter question (5-20 words) for ${connectionUser.name}`;
+
+        // Add interests to the prompt if available
+        if (connectionUser.interests && connectionUser.interests.length > 0) {
+            prompt += ` based on their interests: ${connectionUser.interests.join(', ')}`;
+        }
+
+        // Add shared interests if available
+        if (user.interests && connectionUser.interests) {
+            const commonInterests = user.interests.filter((interest: string) =>
+                connectionUser.interests.includes(interest)
+            );
+
+            if (commonInterests.length > 0) {
+                prompt += `. Include a reference to your shared interests: ${commonInterests.join(', ')}`;
+            }
+        }
+
+        // Generate the conversation starter using OpenAI
+        const completion = await openai.chat.completions.create({
+            model: "gpt-4o-mini",
+            messages: [
+                {
+                    role: "system",
+                    content: "You generate brief, engaging conversation starters between 5-20 words. Make them personal and specific to the recipient's interests."
+                },
+                {
+                    role: "user",
+                    content: prompt
+                }
+            ],
+            max_tokens: 50,
+            temperature: 0.7,
+        });
+
+        // Get the generated starter
+        const generatedStarter = completion.choices[0]?.message?.content?.trim() || "How's your day going?";
+
+        // Format the final starter
+        const personalizedStarter = `Ask ${connectionUser.name}: ${generatedStarter}`;
+
+        return NextResponse.json({
+            conversationStarter: personalizedStarter
+        });
+
+    } catch (error) {
+        console.error("Error generating conversation starter:", error);
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
     }
 }

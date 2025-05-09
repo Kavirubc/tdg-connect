@@ -19,7 +19,7 @@ export async function GET() {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        // Find the user and populate their active connections
+        // Find the user and populate their connections
         const user = await User.findById(session.user.id)
             .populate({
                 path: 'connections.user',
@@ -30,21 +30,24 @@ export async function GET() {
             return NextResponse.json({ error: 'User not found' }, { status: 404 });
         }
 
-        // Filter out disconnected connections and transform the data structure
-        const activeConnections = user.connections
-            .filter((conn: Connection) => !conn.isDisconnected)
-            .map((conn: Connection) => ({
-                _id: conn.user._id,
-                name: conn.user.name,
-                code: conn.user.code,
-                email: conn.user.email,
-                interests: conn.user.interests,
-                facts: conn.user.facts
-            }));
+        // Transform the data structure to include all connections
+        const allConnections = user.connections.map((conn: Connection) => ({
+            _id: conn.user._id,
+            name: conn.user.name,
+            code: conn.user.code,
+            email: conn.user.email,
+            interests: conn.user.interests,
+            facts: conn.user.facts,
+            isDisconnected: conn.isDisconnected
+        }));
+
+        // Filter only active connections for the connections page
+        const activeConnections = allConnections.filter((conn: { isDisconnected: any; }) => !conn.isDisconnected);
 
         return NextResponse.json({
             connections: activeConnections,
-            totalConnections: activeConnections.length
+            allConnections: allConnections,
+            totalConnections: allConnections.length
         });
     } catch (error) {
         console.error('Error fetching connections:', error);
