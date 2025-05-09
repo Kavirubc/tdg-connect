@@ -15,6 +15,7 @@ export default function RegisterPage() {
   const [interestTags, setInterestTags] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -38,6 +39,7 @@ export default function RegisterPage() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null);
+    setLoading(true);
     try {
       const response = await fetch('/api/register', {
         method: 'POST',
@@ -52,11 +54,13 @@ export default function RegisterPage() {
       if (!response.ok) throw new Error(data.error || 'Registration failed');
 
       setSuccess(true);
+      setLoading(false);
       // Redirect to login page after a brief delay
       setTimeout(() => {
         router.push('/auth/login');
       }, 2000);
     } catch (err) {
+      setLoading(false);
       if (err instanceof Error) {
         setError(err.message);
       } else {
@@ -81,6 +85,12 @@ export default function RegisterPage() {
         {error && (
           <div className="mb-4 p-3 bg-[#f9e5e5] text-red-700 rounded-lg">
             {error}
+          </div>
+        )}
+
+        {loading && (
+          <div className="mb-4 p-3 bg-[#e6f2ea] text-blue-700 rounded-lg">
+            Registering...
           </div>
         )}
 
@@ -184,8 +194,9 @@ export default function RegisterPage() {
           <button
             type="submit"
             className="community-btn community-btn-primary w-full mt-6"
+            disabled={loading}
           >
-            Create Account
+            {loading ? 'Registering...' : 'Create Account'}
           </button>
 
           <div className="text-center mt-6 text-[#555555]">

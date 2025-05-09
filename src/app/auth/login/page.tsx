@@ -8,6 +8,7 @@ import Link from 'next/link';
 export default function LoginPage() {
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -18,11 +19,13 @@ export default function LoginPage() {
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null);
+    setLoading(true);
     const result = await signIn('credentials', {
       redirect: false,
       email: formData.email,
       password: formData.password,
     });
+    setLoading(false);
     if (result?.error) {
       setError(result.error);
     } else {
@@ -46,6 +49,11 @@ export default function LoginPage() {
         {error && (
           <div className="mb-4 p-3 bg-[#f9e5e5] text-red-700 rounded-lg">
             {error}
+          </div>
+        )}
+        {loading && (
+          <div className="mb-4 p-3 bg-[#e6f2ea] text-blue-700 rounded-lg">
+            Signing in...
           </div>
         )}
 
@@ -85,8 +93,9 @@ export default function LoginPage() {
           <button
             type="submit"
             className="community-btn community-btn-primary w-full mt-6"
+            disabled={loading}
           >
-            Sign In
+            {loading ? 'Signing in...' : 'Sign In'}
           </button>
 
           <div className="text-center mt-6 text-[#555555]">
