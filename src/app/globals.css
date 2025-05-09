@@ -1,8 +1,16 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f8f7f4;
+  --foreground: #333333;
+  --primary: #7bb5d3;
+  --primary-light: #c2e0f0;
+  --primary-dark: #5a95b5;
+  --accent: #d1b89c;
+  --accent-light: #e6d7c4;
+  --accent-dark: #b29777;
+  --neutral: #f5f5f5;
+  --card-bg: #ffffff;
 }
 
 @theme inline {
@@ -22,5 +30,57 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'Inter', Arial, Helvetica, sans-serif;
+}
+
+/* Add rounded corners and soft shadows for a more friendly feel */
+.community-card {
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  background: var(--card-bg);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.community-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.08);
+}
+
+/* Mobile-first button styling */
+.community-btn {
+  padding: 0.75rem 1.25rem;
+  border-radius: 999px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.community-btn-primary {
+  background-color: var(--primary);
+  color: white;
+}
+
+.community-btn-primary:hover {
+  background-color: var(--primary-dark);
+}
+
+.community-btn-secondary {
+  background-color: var(--accent);
+  color: white;
+}
+
+.community-btn-secondary:hover {
+  background-color: var(--accent-dark);
+}
+
+/* Tag styling */
+.community-tag {
+  background-color: var(--primary-light);
+  color: var(--primary-dark);
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 500;
 }
