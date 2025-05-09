@@ -43,6 +43,7 @@ export default function ConnectionClient({ userCode }: ConnectionClientProps) {
         throw new Error('Failed to fetch connections');
       }
       const data = await response.json();
+      // Only show active connections in the connections page
       setConnections(data.connections);
     } catch (error) {
       console.error('Error fetching connections:', error);
@@ -250,7 +251,7 @@ export default function ConnectionClient({ userCode }: ConnectionClientProps) {
           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-[#7bb5d3]" viewBox="0 0 20 20" fill="currentColor">
             <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
           </svg>
-          Your Connections
+          Your Active Connections
         </h2>
 
         {isLoading ? (
@@ -265,8 +266,11 @@ export default function ConnectionClient({ userCode }: ConnectionClientProps) {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
               </svg>
             </div>
-            <p className="text-[#555555] mb-1">You have not connected with anyone yet.</p>
+            <p className="text-[#555555] mb-1">You have no active connections.</p>
             <p className="text-[#777777] text-sm mb-6">Share your code or enter someone else's code to connect.</p>
+            <Link href="/dashboard" className="community-btn text-sm py-1.5 px-3 rounded-full bg-[#c2e0f0] text-[#5a95b5] hover:bg-[#7bb5d3] hover:text-white">
+              View All Connections on Dashboard
+            </Link>
           </div>
         ) : (
           <div className="divide-y divide-[#f0f0f0]">

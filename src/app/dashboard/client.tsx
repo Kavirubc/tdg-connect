@@ -34,7 +34,7 @@ export default function DashboardClient({ session }: { session: Session | null }
                     throw new Error('Failed to fetch connections');
                 }
                 const data = await response.json();
-                setConnections(data.connections);
+                setConnections(data.allConnections || []);
                 setTotalConnections(data.totalConnections);
             } catch (err) {
                 setError('Failed to fetch your connections');
@@ -80,6 +80,8 @@ export default function DashboardClient({ session }: { session: Session | null }
         }
     }
 
+    const activeConnections = connections.filter(conn => !conn.isDisconnected);
+
     return (
         <div className="space-y-6">
             {/* Welcome banner */}
@@ -111,7 +113,11 @@ export default function DashboardClient({ session }: { session: Session | null }
                     </div>
                     <div className="text-sm text-[#777777] uppercase tracking-wide">My Network</div>
                     <div className="text-3xl font-bold text-[#333333] mt-1">{totalConnections}</div>
-                    <div className="text-sm text-[#777777] mt-1">connections</div>
+                    <div className="text-sm text-[#777777] mt-1">
+                        connections
+                        {totalConnections > activeConnections.length &&
+                            <span> ({activeConnections.length} active)</span>}
+                    </div>
                 </div>
 
                 <div className="community-card p-5 text-center">
@@ -175,10 +181,20 @@ export default function DashboardClient({ session }: { session: Session | null }
                 ) : (
                     <div className="divide-y divide-[#f0f0f0]">
                         {connections.map((connection) => (
-                            <div key={connection._id} className="py-5 first:pt-0 last:pb-0">
+                            <div
+                                key={connection._id}
+                                className={`py-5 first:pt-0 last:pb-0 ${connection.isDisconnected ? 'opacity-70' : ''}`}
+                            >
                                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                                     <div>
-                                        <h3 className="font-semibold text-lg text-[#333333]">{connection.name}</h3>
+                                        <div className="flex items-center">
+                                            <h3 className="font-semibold text-lg text-[#333333]">{connection.name}</h3>
+                                            {connection.isDisconnected && (
+                                                <span className="ml-2 text-xs px-2 py-1 bg-gray-200 text-gray-600 rounded-full">
+                                                    Disconnected
+                                                </span>
+                                            )}
+                                        </div>
                                         <p className="text-[#777777] text-sm mt-1">Code: {connection.code}</p>
 
                                         {connection.interests?.length > 0 && (
@@ -196,19 +212,21 @@ export default function DashboardClient({ session }: { session: Session | null }
                                             </div>
                                         )}
                                     </div>
-                                    <button
-                                        className={`community-btn text-sm py-2 px-4 transition-colors rounded-full 
-                                            ${generatingStarter && activeConversationStarter.connectionId === connection._id
-                                                ? 'bg-gray-100 text-gray-500 cursor-wait'
-                                                : 'bg-[#e6d7c4] text-[#b29777] hover:bg-[#d1b89c] hover:text-white'
-                                            }`}
-                                        onClick={() => generateConversationStarter(connection)}
-                                        disabled={generatingStarter}
-                                    >
-                                        {generatingStarter && activeConversationStarter.connectionId === connection._id
-                                            ? 'Generating...'
-                                            : 'Get Conversation Starter'}
-                                    </button>
+                                    {!connection.isDisconnected && (
+                                        <button
+                                            className={`community-btn text-sm py-2 px-4 transition-colors rounded-full 
+                                                ${generatingStarter && activeConversationStarter.connectionId === connection._id
+                                                    ? 'bg-gray-100 text-gray-500 cursor-wait'
+                                                    : 'bg-[#e6d7c4] text-[#b29777] hover:bg-[#d1b89c] hover:text-white'
+                                                }`}
+                                            onClick={() => generateConversationStarter(connection)}
+                                            disabled={generatingStarter}
+                                        >
+                                            {generatingStarter && activeConversationStarter.connectionId === connection._id
+                                                ? 'Generating...'
+                                                : 'Get Conversation Starter'}
+                                        </button>
+                                    )}
                                 </div>
 
                                 {activeConversationStarter.connectionId === connection._id &&
