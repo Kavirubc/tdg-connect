@@ -18,13 +18,34 @@ interface ActiveConversationStarter {
     text: string;
 }
 
+interface RankingInfo {
+    rank: number;
+    tier: string;
+}
+
 export default function DashboardClient({ session }: { session: Session | null }) {
     const [connections, setConnections] = useState<Connection[]>([]);
     const [totalConnections, setTotalConnections] = useState(0);
+    const [rankingInfo, setRankingInfo] = useState<RankingInfo>({ rank: 0, tier: 'Newcomer' });
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [generatingStarter, setGeneratingStarter] = useState(false);
     const [activeConversationStarter, setActiveConversationStarter] = useState<ActiveConversationStarter>({ connectionId: null, text: '' });
+
+    // Calculate ranking based on total connections
+    const calculateRanking = (connectionCount: number): RankingInfo => {
+        if (connectionCount === 0) return { rank: 0, tier: 'Newcomer' };
+
+        // Define tiers based on connection count
+        if (connectionCount >= 20) return { rank: 1, tier: 'Platinum Networker' };
+        if (connectionCount >= 15) return { rank: 2, tier: 'Gold Networker' };
+        if (connectionCount >= 10) return { rank: 3, tier: 'Silver Networker' };
+        if (connectionCount >= 7) return { rank: 4, tier: 'Bronze Networker' };
+        if (connectionCount >= 5) return { rank: 5, tier: 'Connector' };
+        if (connectionCount >= 3) return { rank: 6, tier: 'Socializer' };
+
+        return { rank: 7, tier: 'Beginner' };
+    };
 
     useEffect(() => {
         async function fetchConnections() {
@@ -36,6 +57,7 @@ export default function DashboardClient({ session }: { session: Session | null }
                 const data = await response.json();
                 setConnections(data.allConnections || []);
                 setTotalConnections(data.totalConnections);
+                setRankingInfo(calculateRanking(data.totalConnections));
             } catch (err) {
                 setError('Failed to fetch your connections');
                 console.error(err);
@@ -139,9 +161,11 @@ export default function DashboardClient({ session }: { session: Session | null }
                     </div>
                     <div className="text-sm text-[#777777] uppercase tracking-wide">Event Ranking</div>
                     <div className="text-3xl font-bold text-[#333333] mt-1">
-                        {totalConnections > 0 ? '#' + (Math.floor(Math.random() * 10) + 1) : 'N/A'}
+                        {totalConnections > 0 ? '#' + rankingInfo.rank : 'N/A'}
                     </div>
-                    <div className="text-sm text-[#777777] mt-1">keep connecting!</div>
+                    <div className="text-sm text-[#777777] mt-1">
+                        {totalConnections > 0 ? rankingInfo.tier : 'Make connections to earn a rank!'}
+                    </div>
                 </div>
             </div>
 
