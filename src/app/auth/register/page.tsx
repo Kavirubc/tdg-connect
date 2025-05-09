@@ -53,61 +53,122 @@ export default function RegisterPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
-      <form onSubmit={handleSubmit} className="w-full max-w-md space-y-4">
-        <h1 className="text-2xl font-bold">Register</h1>
-        {error && <p className="text-red-500">{error}</p>}
-        {success && <p className="text-green-500">Registration successful! Redirecting...</p>}
-        <input
-          type="text"
-          name="name"
-          placeholder="Name"
-          value={formData.name}
-          onChange={handleChange}
-          className="w-full p-2 border rounded"
-          required
-        />
-        <input
-          type="email"
-          name="email"
-          placeholder="Email"
-          value={formData.email}
-          onChange={handleChange}
-          className="w-full p-2 border rounded"
-          required
-        />
-        <input
-          type="password"
-          name="password"
-          placeholder="Password"
-          value={formData.password}
-          onChange={handleChange}
-          className="w-full p-2 border rounded"
-          required
-        />
-        <textarea
-          name="interests"
-          placeholder="Interests (comma-separated)"
-          value={formData.interests}
-          onChange={handleChange}
-          className="w-full p-2 border rounded"
-        />
-        <textarea
-          name="facts"
-          placeholder="Facts about yourself (comma-separated)"
-          value={formData.facts}
-          onChange={handleChange}
-          className="w-full p-2 border rounded"
-        />
-        <button
-          type="submit"
-          className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600"
-        >
-          Register
-        </button>
-        <div className="text-center mt-4">
-          Already have an account? <Link href="/auth/login" className="text-blue-500 hover:underline">Login here</Link>
+      <div className="community-card w-full max-w-md p-6">
+        <div className="mb-6 text-center">
+          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[#c2e0f0] flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-[#7bb5d3]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+            </svg>
+          </div>
+          <h1 className="text-2xl font-bold text-[#333333]">Join Our Community</h1>
+          <p className="text-[#777777] mt-1">Create an account to connect with others</p>
         </div>
-      </form>
+
+        {error && (
+          <div className="mb-4 p-3 bg-[#f9e5e5] text-red-700 rounded-lg">
+            {error}
+          </div>
+        )}
+
+        {success && (
+          <div className="mb-4 p-3 bg-[#e6f2ea] text-green-700 rounded-lg">
+            Registration successful! Redirecting...
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label htmlFor="name" className="block text-sm font-medium text-[#555555] mb-1">
+              Your Name
+            </label>
+            <input
+              id="name"
+              type="text"
+              name="name"
+              placeholder="Enter your full name"
+              value={formData.name}
+              onChange={handleChange}
+              className="w-full p-3 border border-[#e6d7c4] rounded-lg focus:ring-2 focus:ring-[#7bb5d3] focus:border-[#7bb5d3]"
+              required
+            />
+          </div>
+
+          <div>
+            <label htmlFor="email" className="block text-sm font-medium text-[#555555] mb-1">
+              Email Address
+            </label>
+            <input
+              id="email"
+              type="email"
+              name="email"
+              placeholder="you@example.com"
+              value={formData.email}
+              onChange={handleChange}
+              className="w-full p-3 border border-[#e6d7c4] rounded-lg focus:ring-2 focus:ring-[#7bb5d3] focus:border-[#7bb5d3]"
+              required
+            />
+          </div>
+
+          <div>
+            <label htmlFor="password" className="block text-sm font-medium text-[#555555] mb-1">
+              Password
+            </label>
+            <input
+              id="password"
+              type="password"
+              name="password"
+              placeholder="Create a password"
+              value={formData.password}
+              onChange={handleChange}
+              className="w-full p-3 border border-[#e6d7c4] rounded-lg focus:ring-2 focus:ring-[#7bb5d3] focus:border-[#7bb5d3]"
+              required
+            />
+          </div>
+
+          <div>
+            <label htmlFor="interests" className="block text-sm font-medium text-[#555555] mb-1">
+              Your Interests
+            </label>
+            <textarea
+              id="interests"
+              name="interests"
+              placeholder="Tech, Sports, Art, etc. (comma-separated)"
+              value={formData.interests}
+              onChange={handleChange}
+              className="w-full p-3 border border-[#e6d7c4] rounded-lg focus:ring-2 focus:ring-[#7bb5d3] focus:border-[#7bb5d3]"
+              rows={2}
+            />
+            <p className="mt-1 text-xs text-[#777777]">Separate with commas, e.g. "Reading, Hiking, Technology"</p>
+          </div>
+
+          <div>
+            <label htmlFor="facts" className="block text-sm font-medium text-[#555555] mb-1">
+              Fun Facts About You
+            </label>
+            <textarea
+              id="facts"
+              name="facts"
+              placeholder="I love coffee, I've visited 10 countries, etc."
+              value={formData.facts}
+              onChange={handleChange}
+              className="w-full p-3 border border-[#e6d7c4] rounded-lg focus:ring-2 focus:ring-[#7bb5d3] focus:border-[#7bb5d3]"
+              rows={2}
+            />
+            <p className="mt-1 text-xs text-[#777777]">Separate with commas</p>
+          </div>
+
+          <button
+            type="submit"
+            className="community-btn community-btn-primary w-full mt-6"
+          >
+            Create Account
+          </button>
+
+          <div className="text-center mt-6 text-[#555555]">
+            Already have an account? <Link href="/auth/login" className="text-[#7bb5d3] hover:underline font-medium">Sign in</Link>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }
