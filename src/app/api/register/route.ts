@@ -14,7 +14,7 @@ function generateUniqueCode(existingCodes: string[]) {
 export async function POST(req: NextRequest) {
     try {
         await connectToDatabase();
-        const { name, email, password, interests, facts } = await req.json();
+        const { name, email, password, phone, interests, facts } = await req.json();
 
         const existingUser = await User.findOne({ email });
         if (existingUser) {
@@ -30,6 +30,7 @@ export async function POST(req: NextRequest) {
             name,
             email,
             password: hashedPassword,
+            phone, // Add phone
             code: uniqueCode,
             interests,
             facts,
