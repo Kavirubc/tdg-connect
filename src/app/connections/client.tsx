@@ -31,6 +31,7 @@ export default function ConnectionClient({ userCode }: ConnectionClientProps) {
   const [conversationStarters, setConversationStarters] = useState<Record<string, string>>({});
   const [generatingFor, setGeneratingFor] = useState<string | null>(null);
   const [sharedEmails, setSharedEmails] = useState<Record<string, boolean>>({});
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     fetchConnections();
@@ -165,48 +166,80 @@ export default function ConnectionClient({ userCode }: ConnectionClientProps) {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
-        <h1 className="text-2xl font-bold text-[#333333] flex items-center">
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-2 text-[#7bb5d3]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+    <div className="space-y-8">
+      {/* Hero banner */}
+      <div className="relative overflow-hidden rounded-xl bg-gradient-to-r from-[#7bb5d3] to-[#5a95b5] text-white">
+        <div className="absolute inset-0 opacity-10">
+          <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
+            <defs>
+              <pattern id="pattern" width="40" height="40" patternUnits="userSpaceOnUse">
+                <path d="M0 20 L40 20" stroke="currentColor" strokeWidth="0.5" />
+                <path d="M20 0 L20 40" stroke="currentColor" strokeWidth="0.5" />
+              </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#pattern)" />
           </svg>
-          Your Connections
-        </h1>
-        <Link
-          href="/dashboard"
-          className="community-btn community-btn-primary whitespace-nowrap"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-            <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
-          </svg>
-          Go to Dashboard
-        </Link>
+        </div>
+        <div className="relative p-8 md:p-10">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div>
+              <h1 className="text-3xl font-bold mb-2">Your Connections</h1>
+              <p className="text-white/80 max-w-lg">Manage your network and make new connections.</p>
+            </div>
+            <Link
+              href="/dashboard"
+              className="bg-white text-[#5a95b5] py-3 px-6 rounded-full hover:bg-opacity-90 transition-all transform hover:scale-105 shadow-md flex items-center justify-center whitespace-nowrap font-medium"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
+              </svg>
+              Go to Dashboard
+            </Link>
+          </div>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {/* Stats cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
         {/* Your code section */}
-        <div className="community-card p-6">
-          <h2 className="text-xl font-bold mb-4 text-[#333333] flex items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-[#7bb5d3]" viewBox="0 0 20 20" fill="currentColor">
-              <path d="M10 2a5 5 0 00-5 5v2a2 2 0 00-2 2v5a2 2 0 002 2h10a2 2 0 002-2v-5a2 2 0 00-2-2H7V7a3 3 0 116 0v2h2V7a5 5 0 00-5-5z" />
-            </svg>
-            Your Connection Code
-          </h2>
-          <div className="text-4xl md:text-5xl font-mono font-bold text-[#7bb5d3] tracking-widest p-4 border-2 border-[#c2e0f0] rounded-lg bg-[#f8f7f4] text-center">
-            {userCode}
+        <div className="community-card p-6 border border-gray-100">
+          <div className="flex items-center mb-4">
+            <div className="bg-[#e6f2ff] p-3 rounded-full mr-4">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-[#7bb5d3]" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M10 2a5 5 0 00-5 5v2a2 2 0 00-2 2v5a2 2 0 002 2h10a2 2 0 002-2v-5a2 2 0 00-2-2H7V7a3 3 0 116 0v2h2V7a5 5 0 00-5-5z" />
+              </svg>
+            </div>
+            <div>
+              <div className="text-sm font-medium text-gray-500 uppercase tracking-wide">Your Code</div>
+              <div className="text-2xl font-mono font-bold text-[#333333]">{userCode}</div>
+              <div className="text-xs text-gray-500 mt-1">share to connect</div>
+            </div>
           </div>
-          <p className="mt-3 text-[#777777] text-center">Share this code with others to connect</p>
+          <button
+            className="mt-2 w-full py-2 border border-[#7bb5d3] text-[#7bb5d3] rounded-md text-sm hover:bg-[#e6f2ff] transition-colors"
+            onClick={async () => {
+              await navigator.clipboard.writeText(userCode);
+              setCopied(true);
+              setTimeout(() => setCopied(false), 1500);
+            }}
+          >
+            {copied ? 'Copied!' : 'Copy Code'}
+          </button>
         </div>
 
         {/* Record connection section */}
-        <div className="community-card p-6">
-          <h2 className="text-xl font-bold mb-4 text-[#333333] flex items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-[#d1b89c]" viewBox="0 0 20 20" fill="currentColor">
-              <path d="M8 9a3 3 0 100-6 3 3 0 000 6zM8 11a6 6 0 016 6H2a6 6 0 016-6zM16 7a1 1 0 10-2 0v1h-1a1 1 0 100 2h1v1a1 1 0 102 0v-1h1a1 1 0 100-2h-1V7z" />
-            </svg>
-            Record a Connection
-          </h2>
+        <div className="community-card p-6 border border-gray-100">
+          <div className="flex items-center mb-4">
+            <div className="bg-[#f9f0e6] p-3 rounded-full mr-4">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-[#d1b89c]" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M8 9a3 3 0 100-6 3 3 0 000 6zM8 11a6 6 0 016 6H2a6 6 0 016-6zM16 7a1 1 0 10-2 0v1h-1a1 1 0 100 2h1v1a1 1 0 102 0v-1h1a1 1 0 100-2h-1V7z" />
+              </svg>
+            </div>
+            <div>
+              <div className="text-sm font-medium text-gray-500 uppercase tracking-wide">New Connection</div>
+              <div className="text-2xl font-bold text-[#333333]">Add Connection</div>
+            </div>
+          </div>
 
           {message.text && (
             <div
@@ -218,16 +251,13 @@ export default function ConnectionClient({ userCode }: ConnectionClientProps) {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label htmlFor="connectionCode" className="block text-sm font-medium text-[#555555] mb-1">
-                Enter 4-digit code
-              </label>
               <input
                 id="connectionCode"
                 type="text"
                 inputMode="numeric"
                 pattern="[0-9]{4}"
                 maxLength={4}
-                placeholder="Enter code"
+                placeholder="Enter 4-digit code"
                 value={connectionCode}
                 onChange={(e) => setConnectionCode(e.target.value)}
                 className="w-full p-4 text-xl border border-[#e6d7c4] rounded-lg focus:ring-2 focus:ring-[#7bb5d3] focus:border-[#7bb5d3]"
@@ -237,7 +267,7 @@ export default function ConnectionClient({ userCode }: ConnectionClientProps) {
             <button
               type="submit"
               disabled={isSubmitting}
-              className={`community-btn community-btn-primary w-full text-lg ${isSubmitting ? 'opacity-75 cursor-not-allowed' : ''}`}
+              className={`w-full py-3 px-6 rounded-full bg-[#7bb5d3] text-white hover:bg-[#5a9cbf] transition-all transform hover:scale-105 shadow-md font-medium ${isSubmitting ? 'opacity-75 cursor-not-allowed' : ''}`}
             >
               {isSubmitting ? 'Connecting...' : 'Connect'}
             </button>
@@ -246,13 +276,15 @@ export default function ConnectionClient({ userCode }: ConnectionClientProps) {
       </div>
 
       {/* Connections List */}
-      <div className="community-card p-6">
-        <h2 className="text-xl font-bold mb-6 text-[#333333] flex items-center">
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-[#7bb5d3]" viewBox="0 0 20 20" fill="currentColor">
-            <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
-          </svg>
-          Your Active Connections
-        </h2>
+      <div className="community-card p-6 border border-gray-100">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-xl font-bold text-[#333333] flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-[#7bb5d3]" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z" />
+            </svg>
+            Your Connections
+          </h2>
+        </div>
 
         {isLoading ? (
           <div className="p-12 text-center">
@@ -261,76 +293,82 @@ export default function ConnectionClient({ userCode }: ConnectionClientProps) {
           </div>
         ) : connections.length === 0 ? (
           <div className="text-center py-12">
-            <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-[#c2e0f0] flex items-center justify-center">
+            <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-[#e6f2ff] flex items-center justify-center">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-[#7bb5d3]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
               </svg>
             </div>
-            <p className="text-[#555555] mb-1">You have no active connections.</p>
-            <p className="text-[#777777] text-sm mb-6">Share your code or enter someone else's code to connect.</p>
-            <Link href="/dashboard" className="community-btn text-sm py-1.5 px-3 rounded-full bg-[#c2e0f0] text-[#5a95b5] hover:bg-[#7bb5d3] hover:text-white">
-              View All Connections on Dashboard
-            </Link>
+            <p className="text-[#555555] mb-4">You haven&apos;t connected with anyone yet.</p>
+            <p className="text-[#777777]">Share your code with others to start building your network!</p>
           </div>
         ) : (
-          <div className="divide-y divide-[#f0f0f0]">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {connections.map((connection) => (
-              <div key={connection._id} className="py-6 first:pt-0 last:pb-0">
-                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-                  <div>
-                    <h3 className="text-xl font-semibold text-[#333333]">{connection.name}</h3>
-                    <p className="text-[#777777] text-sm mt-1">
-                      Interests: {connection.interests.length > 0
-                        ? connection.interests.join(', ')
-                        : 'None specified'}
-                    </p>
-
-                    {sharedEmails[connection._id] && (
-                      <p className="text-[#777777] text-sm mt-1">
-                        Email: <a href={`mailto:${connection.email}`} className="text-[#7bb5d3] hover:underline">
-                          {connection.email}
-                        </a>
-                      </p>
-                    )}
+              <div
+                key={connection._id}
+                className={`p-5 border border-gray-100 rounded-lg ${connection.isDisconnected ? 'opacity-70' : ''}`}
+              >
+                <div className="flex items-center mb-3">
+                  <div className="w-12 h-12 bg-[#e6f2ff] rounded-full flex items-center justify-center mr-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-[#7bb5d3]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
                   </div>
-
-                  <div className="flex flex-wrap gap-2">
-                    {!sharedEmails[connection._id] && (
-                      <button
-                        onClick={() => shareEmail(connection._id)}
-                        className="community-btn text-sm py-1.5 px-3 bg-[#c2e0f0] text-[#5a95b5] hover:bg-[#7bb5d3] hover:text-white rounded-full"
-                      >
-                        Share Contact
-                      </button>
-                    )}
-
-                    <button
-                      onClick={() => disconnectUser(connection._id)}
-                      className="community-btn text-sm py-1.5 px-3 bg-[#f9e5e5] text-[#d05353] hover:bg-[#e66767] hover:text-white rounded-full"
-                    >
-                      Disconnect
-                    </button>
-
-                    <button
-                      onClick={() => generateConversationStarter(connection._id)}
-                      disabled={generatingFor === connection._id}
-                      className={`community-btn text-sm py-1.5 px-3 rounded-full transition-colors 
-                        ${generatingFor === connection._id
-                          ? 'bg-gray-100 text-gray-500 cursor-not-allowed'
-                          : 'bg-[#e6d7c4] text-[#b29777] hover:bg-[#d1b89c] hover:text-white'
-                        }`}
-                    >
-                      {generatingFor === connection._id ? 'Generating...' :
-                        conversationStarters[connection._id] ? 'Regenerate' : 'Get Conversation Starter'}
-                    </button>
+                  <div>
+                    <h3 className="font-semibold text-[#333333]">{connection.name}</h3>
+                    <p className="text-[#777777] text-sm">Code: {connection.code}</p>
                   </div>
                 </div>
 
-                {/* Conversation Starter Display */}
+                {connection.interests?.length > 0 && (
+                  <div className="mt-3">
+                    <div className="flex flex-wrap gap-1 mt-1">
+                      {connection.interests.slice(0, 3).map((interest: string, i: number) => (
+                        <span
+                          key={i}
+                          className="px-2 py-1 bg-[#e6f2ff] text-[#7bb5d3] rounded-full text-xs"
+                        >
+                          {interest}
+                        </span>
+                      ))}
+                      {connection.interests.length > 3 && (
+                        <span className="text-xs text-gray-500">+{connection.interests.length - 3} more</span>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                <div className="mt-4 space-y-2">
+                  <button
+                    className="w-full text-center py-2 px-4 border border-[#7bb5d3] text-[#7bb5d3] rounded-md text-sm hover:bg-[#e6f2ff] transition-colors"
+                    onClick={() => generateConversationStarter(connection._id)}
+                    disabled={generatingFor === connection._id}
+                  >
+                    {generatingFor === connection._id
+                      ? 'Generating...'
+                      : 'Start Conversation'}
+                  </button>
+
+                  {!sharedEmails[connection._id] && (
+                    <button
+                      className="w-full text-center py-2 px-4 border border-[#d1b89c] text-[#d1b89c] rounded-md text-sm hover:bg-[#f9f0e6] transition-colors"
+                      onClick={() => shareEmail(connection._id)}
+                    >
+                      Share Email
+                    </button>
+                  )}
+
+                  <button
+                    className="w-full text-center py-2 px-4 border border-red-200 text-red-500 rounded-md text-sm hover:bg-red-50 transition-colors"
+                    onClick={() => disconnectUser(connection._id)}
+                  >
+                    Disconnect
+                  </button>
+                </div>
+
                 {conversationStarters[connection._id] && (
-                  <div className="mt-4 p-4 bg-[#f8f7f4] border border-[#e6d7c4] rounded-lg">
-                    <h4 className="text-sm uppercase font-semibold text-[#b29777] mb-2">Conversation Starter</h4>
-                    <p className="text-[#555555]">{conversationStarters[connection._id]}</p>
+                  <div className="mt-3 p-3 bg-[#e6f2ff] rounded-md">
+                    <p className="text-sm text-[#333333]">{conversationStarters[connection._id]}</p>
                   </div>
                 )}
               </div>

@@ -220,44 +220,7 @@ export default function DashboardClient({ session }: { session: Session | null }
                 </div>
             </div>
 
-            {/* Activity Feed */}
-            <div className="community-card p-6 border border-gray-100">
-                <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-xl font-bold text-[#333333] flex items-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-[#7bb5d3]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                        </svg>
-                        Recent Activity
-                    </h2>
-                    <button className="text-sm text-[#7bb5d3] hover:underline">View All</button>
-                </div>
-
-                <div className="space-y-4">
-                    <div className="flex items-start p-4 bg-gray-50 rounded-lg">
-                        <div className="bg-[#e6f2ff] p-2 rounded-full mr-4 flex-shrink-0">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-[#7bb5d3]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                            </svg>
-                        </div>
-                        <div>
-                            <p className="text-gray-800">New community discussion: <span className="font-medium">Summer Meetup Planning</span></p>
-                            <p className="text-sm text-gray-500 mt-1">2 hours ago</p>
-                        </div>
-                    </div>
-
-                    <div className="flex items-start p-4 bg-gray-50 rounded-lg">
-                        <div className="bg-[#f9f0e6] p-2 rounded-full mr-4 flex-shrink-0">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-[#d1b89c]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                            </svg>
-                        </div>
-                        <div>
-                            <p className="text-gray-800">Upcoming event: <span className="font-medium">Community Workshop</span></p>
-                            <p className="text-sm text-gray-500 mt-1">This Saturday at 2:00 PM</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
+           
 
             {/* Connections section */}
             <div className="community-card p-6 border border-gray-100">
