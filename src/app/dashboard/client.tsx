@@ -105,72 +105,162 @@ export default function DashboardClient({ session }: { session: Session | null }
     const activeConnections = connections.filter(conn => !conn.isDisconnected);
 
     return (
-        <div className="space-y-6">
-            {/* Welcome banner */}
-            <div className="community-card p-6 bg-gradient-to-r from-[#c2e0f0] to-[#e6d7c4]">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div>
-                        <h1 className="text-2xl font-bold text-[#333333] mb-2">Welcome to Your Community</h1>
-                        <p className="text-[#555555]">Connect with others and build meaningful relationships</p>
+        <div className="space-y-8">
+            {/* Hero banner */}
+            <div className="relative overflow-hidden rounded-xl bg-gradient-to-r from-[#7bb5d3] to-[#5a95b5] text-white">
+                <div className="absolute inset-0 opacity-10">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
+                        <defs>
+                            <pattern id="pattern" width="40" height="40" patternUnits="userSpaceOnUse">
+                                <path d="M0 20 L40 20" stroke="currentColor" strokeWidth="0.5" />
+                                <path d="M20 0 L20 40" stroke="currentColor" strokeWidth="0.5" />
+                            </pattern>
+                        </defs>
+                        <rect width="100%" height="100%" fill="url(#pattern)" />
+                    </svg>
+                </div>
+                <div className="relative p-8 md:p-10">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                        <div>
+                            <h1 className="text-3xl font-bold mb-2">Welcome, {session?.user?.name?.split(' ')[0] || 'Friend'}!</h1>
+                            <p className="text-white/80 max-w-lg">Your community dashboard gives you an overview of your connections and community standing.</p>
+                        </div>
+                        <Link
+                            href="/connections"
+                            className="bg-white text-[#5a95b5] py-3 px-6 rounded-full hover:bg-opacity-90 transition-all transform hover:scale-105 shadow-md flex items-center justify-center whitespace-nowrap font-medium"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clipRule="evenodd" />
+                            </svg>
+                            Add Connection
+                        </Link>
                     </div>
-                    <Link
-                        href="/connections"
-                        className="community-btn community-btn-primary w-full md:w-auto whitespace-nowrap"
-                    >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clipRule="evenodd" />
-                        </svg>
-                        Add Connection
-                    </Link>
                 </div>
             </div>
 
             {/* Stats cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                <div className="community-card p-5 text-center">
-                    <div className="mb-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 mx-auto text-[#7bb5d3]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                        </svg>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="community-card p-6 border border-gray-100">
+                    <div className="flex items-center mb-4">
+                        <div className="bg-[#e6f2ff] p-3 rounded-full mr-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-[#7bb5d3]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <div className="text-sm font-medium text-gray-500 uppercase tracking-wide">My Network</div>
+                            <div className="flex items-baseline">
+                                <div className="text-3xl font-bold text-[#333333]">{totalConnections}</div>
+                                <div className="text-sm text-gray-500 ml-2">connections</div>
+                            </div>
+                            {totalConnections > activeConnections.length && (
+                                <div className="text-xs text-gray-500 mt-1">
+                                    ({activeConnections.length} active)
+                                </div>
+                            )}
+                        </div>
                     </div>
-                    <div className="text-sm text-[#777777] uppercase tracking-wide">My Network</div>
-                    <div className="text-3xl font-bold text-[#333333] mt-1">{totalConnections}</div>
-                    <div className="text-sm text-[#777777] mt-1">
-                        connections
-                        {totalConnections > activeConnections.length &&
-                            <span> ({activeConnections.length} active)</span>}
+                    <div className="mt-2">
+                        <div className="w-full bg-gray-100 rounded-full h-1.5">
+                            <div
+                                className="bg-[#7bb5d3] h-1.5 rounded-full"
+                                style={{ width: `${Math.min(100, (totalConnections / 20) * 100)}%` }}
+                            ></div>
+                        </div>
+                        <div className="text-xs text-gray-500 mt-1 text-right">
+                            {totalConnections}/20 to reach Platinum
+                        </div>
                     </div>
                 </div>
 
-                <div className="community-card p-5 text-center">
-                    <div className="mb-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 mx-auto text-[#d1b89c]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2" />
-                        </svg>
+                <div className="community-card p-6 border border-gray-100">
+                    <div className="flex items-center mb-4">
+                        <div className="bg-[#f9f0e6] p-3 rounded-full mr-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-[#d1b89c]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2" />
+                            </svg>
+                        </div>
+                        <div>
+                            <div className="text-sm font-medium text-gray-500 uppercase tracking-wide">Your Code</div>
+                            <div className="flex items-baseline">
+                                <div className="text-2xl font-mono font-bold text-[#333333]">{session?.user?.code ?? "-"}</div>
+                            </div>
+                            <div className="text-xs text-gray-500 mt-1">share to connect</div>
+                        </div>
                     </div>
-                    <div className="text-sm text-[#777777] uppercase tracking-wide">Your Code</div>
-                    <div className="text-3xl font-mono font-bold text-[#333333] mt-1">{session?.user?.code ?? "-"}</div>
-                    <div className="text-sm text-[#777777] mt-1">share to connect</div>
+                    <button className="mt-2 w-full py-2 border border-[#d1b89c] text-[#d1b89c] rounded-md text-sm hover:bg-[#f9f0e6] transition-colors">
+                        Copy Code
+                    </button>
                 </div>
 
-                <div className="community-card p-5 text-center sm:col-span-2 lg:col-span-1">
-                    <div className="mb-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 mx-auto text-[#7bb5d3]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                <div className="community-card p-6 border border-gray-100 sm:col-span-2 lg:col-span-1">
+                    <div className="flex items-center mb-4">
+                        <div className="bg-[#e6f2ff] p-3 rounded-full mr-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-[#7bb5d3]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <div className="text-sm font-medium text-gray-500 uppercase tracking-wide">Community Rank</div>
+                            <div className="flex items-baseline">
+                                <div className="text-2xl font-bold text-[#333333]">
+                                    {totalConnections > 0 ? rankingInfo.tier : 'Newcomer'}
+                                </div>
+                                {totalConnections > 0 && (
+                                    <div className="text-sm text-gray-500 ml-2">#{rankingInfo.rank}</div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                    <div className="mt-2 text-sm text-gray-600">
+                        {totalConnections > 0
+                            ? `You're in the top ${rankingInfo.rank * 10}% of community members!`
+                            : 'Make connections to earn a rank!'}
+                    </div>
+                </div>
+            </div>
+
+            {/* Activity Feed */}
+            <div className="community-card p-6 border border-gray-100">
+                <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-xl font-bold text-[#333333] flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-[#7bb5d3]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                         </svg>
+                        Recent Activity
+                    </h2>
+                    <button className="text-sm text-[#7bb5d3] hover:underline">View All</button>
+                </div>
+
+                <div className="space-y-4">
+                    <div className="flex items-start p-4 bg-gray-50 rounded-lg">
+                        <div className="bg-[#e6f2ff] p-2 rounded-full mr-4 flex-shrink-0">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-[#7bb5d3]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <p className="text-gray-800">New community discussion: <span className="font-medium">Summer Meetup Planning</span></p>
+                            <p className="text-sm text-gray-500 mt-1">2 hours ago</p>
+                        </div>
                     </div>
-                    <div className="text-sm text-[#777777] uppercase tracking-wide">Event Ranking</div>
-                    <div className="text-3xl font-bold text-[#333333] mt-1">
-                        {totalConnections > 0 ? '#' + rankingInfo.rank : 'N/A'}
-                    </div>
-                    <div className="text-sm text-[#777777] mt-1">
-                        {totalConnections > 0 ? rankingInfo.tier : 'Make connections to earn a rank!'}
+
+                    <div className="flex items-start p-4 bg-gray-50 rounded-lg">
+                        <div className="bg-[#f9f0e6] p-2 rounded-full mr-4 flex-shrink-0">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-[#d1b89c]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <p className="text-gray-800">Upcoming event: <span className="font-medium">Community Workshop</span></p>
+                            <p className="text-sm text-gray-500 mt-1">This Saturday at 2:00 PM</p>
+                        </div>
                     </div>
                 </div>
             </div>
 
             {/* Connections section */}
-            <div className="community-card p-6">
+            <div className="community-card p-6 border border-gray-100">
                 <div className="flex justify-between items-center mb-6">
                     <h2 className="text-xl font-bold text-[#333333] flex items-center">
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-[#7bb5d3]" viewBox="0 0 20 20" fill="currentColor">
@@ -178,6 +268,9 @@ export default function DashboardClient({ session }: { session: Session | null }
                         </svg>
                         Your Connections
                     </h2>
+                    <Link href="/connections" className="text-sm text-[#7bb5d3] hover:underline">
+                        View All
+                    </Link>
                 </div>
 
                 {loading ? (
@@ -186,10 +279,10 @@ export default function DashboardClient({ session }: { session: Session | null }
                         <p className="mt-4 text-[#777777]">Loading your connections...</p>
                     </div>
                 ) : error ? (
-                    <div className="bg-red-100 text-red-700 p-4 rounded-lg">{error}</div>
+                    <div className="bg-red-50 text-red-700 p-4 rounded-lg">{error}</div>
                 ) : connections.length === 0 ? (
                     <div className="text-center py-12">
-                        <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-[#c2e0f0] flex items-center justify-center">
+                        <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-[#e6f2ff] flex items-center justify-center">
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-[#7bb5d3]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                             </svg>
@@ -197,71 +290,81 @@ export default function DashboardClient({ session }: { session: Session | null }
                         <p className="text-[#555555] mb-4">You haven&apos;t connected with anyone yet.</p>
                         <Link
                             href="/connections"
-                            className="community-btn community-btn-primary"
+                            className="bg-[#7bb5d3] text-white py-3 px-6 rounded-full hover:bg-[#5a9cbf] transition-all shadow-md inline-flex items-center justify-center"
                         >
                             Make Your First Connection
                         </Link>
                     </div>
                 ) : (
-                    <div className="divide-y divide-[#f0f0f0]">
-                        {connections.map((connection) => (
+                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                        {connections.slice(0, 3).map((connection) => (
                             <div
                                 key={connection._id}
-                                className={`py-5 first:pt-0 last:pb-0 ${connection.isDisconnected ? 'opacity-70' : ''}`}
+                                className={`p-5 border border-gray-100 rounded-lg ${connection.isDisconnected ? 'opacity-70' : ''}`}
                             >
-                                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                                    <div>
-                                        <div className="flex items-center">
-                                            <h3 className="font-semibold text-lg text-[#333333]">{connection.name}</h3>
-                                            {connection.isDisconnected && (
-                                                <span className="ml-2 text-xs px-2 py-1 bg-gray-200 text-gray-600 rounded-full">
-                                                    Disconnected
-                                                </span>
-                                            )}
-                                        </div>
-                                        <p className="text-[#777777] text-sm mt-1">Code: {connection.code}</p>
-
-                                        {connection.interests?.length > 0 && (
-                                            <div className="mt-3">
-                                                <div className="flex flex-wrap gap-2 mt-1">
-                                                    {connection.interests.map((interest: string, i: number) => (
-                                                        <span
-                                                            key={i}
-                                                            className="community-tag"
-                                                        >
-                                                            {interest}
-                                                        </span>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        )}
+                                <div className="flex items-center mb-3">
+                                    <div className="w-12 h-12 bg-[#e6f2ff] rounded-full flex items-center justify-center mr-3">
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-[#7bb5d3]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                        </svg>
                                     </div>
-                                    {!connection.isDisconnected && (
-                                        <button
-                                            className={`community-btn text-sm py-2 px-4 transition-colors rounded-full 
-                                                ${generatingStarter && activeConversationStarter.connectionId === connection._id
-                                                    ? 'bg-gray-100 text-gray-500 cursor-wait'
-                                                    : 'bg-[#e6d7c4] text-[#b29777] hover:bg-[#d1b89c] hover:text-white'
-                                                }`}
-                                            onClick={() => generateConversationStarter(connection)}
-                                            disabled={generatingStarter}
-                                        >
-                                            {generatingStarter && activeConversationStarter.connectionId === connection._id
-                                                ? 'Generating...'
-                                                : 'Get Conversation Starter'}
-                                        </button>
-                                    )}
+                                    <div>
+                                        <h3 className="font-semibold text-[#333333]">{connection.name}</h3>
+                                        <p className="text-[#777777] text-sm">Code: {connection.code}</p>
+                                    </div>
                                 </div>
 
-                                {activeConversationStarter.connectionId === connection._id &&
-                                    activeConversationStarter.text && (
-                                        <div className="mt-4 p-4 bg-[#f8f7f4] border border-[#e6d7c4] rounded-lg">
-                                            <p className="text-sm font-semibold text-[#b29777] mb-2">Conversation Starter:</p>
-                                            <p className="text-[#555555]">{activeConversationStarter.text}</p>
+                                {connection.interests?.length > 0 && (
+                                    <div className="mt-3">
+                                        <div className="flex flex-wrap gap-1 mt-1">
+                                            {connection.interests.slice(0, 3).map((interest: string, i: number) => (
+                                                <span
+                                                    key={i}
+                                                    className="community-tag"
+                                                >
+                                                    {interest}
+                                                </span>
+                                            ))}
+                                            {connection.interests.length > 3 && (
+                                                <span className="text-xs text-gray-500">+{connection.interests.length - 3} more</span>
+                                            )}
                                         </div>
-                                    )}
+                                    </div>
+                                )}
+
+                                {!connection.isDisconnected && (
+                                    <button
+                                        className="mt-4 w-full text-center py-2 px-4 border border-[#7bb5d3] text-[#7bb5d3] rounded-md text-sm hover:bg-[#e6f2ff] transition-colors"
+                                        onClick={() => generateConversationStarter(connection)}
+                                        disabled={generatingStarter}
+                                    >
+                                        {generatingStarter && activeConversationStarter.connectionId === connection._id
+                                            ? 'Generating...'
+                                            : 'Start Conversation'}
+                                    </button>
+                                )}
+
+                                {activeConversationStarter.connectionId === connection._id && activeConversationStarter.text && (
+                                    <div className="mt-3 p-3 bg-[#e6f2ff] rounded-md">
+                                        <p className="text-sm text-[#333333]">{activeConversationStarter.text}</p>
+                                    </div>
+                                )}
                             </div>
                         ))}
+
+                        {connections.length > 3 && (
+                            <Link
+                                href="/connections"
+                                className="flex flex-col items-center justify-center p-5 border border-dashed border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                            >
+                                <div className="w-12 h-12 bg-[#e6f2ff] rounded-full flex items-center justify-center mb-3">
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-[#7bb5d3]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                    </svg>
+                                </div>
+                                <p className="text-[#7bb5d3] font-medium">View All {connections.length} Connections</p>
+                            </Link>
+                        )}
                     </div>
                 )}
             </div>

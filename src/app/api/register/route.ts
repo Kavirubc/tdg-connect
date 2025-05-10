@@ -1,46 +1,63 @@
-import { NextResponse, NextRequest } from 'next/server';
-import bcrypt from 'bcryptjs';
-import User from '@/models/User';
+import { NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongodb';
+import User from '@/models/User';
+import bcrypt from 'bcryptjs';
 
-function generateUniqueCode(existingCodes: string[]) {
-    let code;
-    do {
-        code = Math.floor(1000 + Math.random() * 9000).toString(); // Generate 4-digit code
-    } while (existingCodes.includes(code));
+// Function to generate a unique 4-digit code
+async function generateUniqueCode(): Promise<string> {
+    let code = '';
+    let isUnique = false;
+    while (!isUnique) {
+        code = Math.floor(1000 + Math.random() * 9000).toString();
+        const existingUser = await User.findOne({ code });
+        if (!existingUser) {
+            isUnique = true;
+        }
+    }
     return code;
 }
 
-export async function POST(req: NextRequest) {
+export async function POST(request: Request) {
     try {
         await connectToDatabase();
-        const { name, email, password, phone, interests, facts } = await req.json();
 
-        const existingUser = await User.findOne({ email });
-        if (existingUser) {
-            return NextResponse.json({ error: 'User already exists' }, { status: 400 });
+        const { name, email, password, phone, interests, facts } = await request.json();
+
+        // Basic validation
+        if (!name || !email || !password || !phone) {
+            return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
         }
 
-        const existingCodes = (await User.find({}, 'code')).map((user) => user.code);
-        const uniqueCode = generateUniqueCode(existingCodes);
+        // Check if user already exists
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
+            return NextResponse.json({ error: 'User already exists' }, { status: 409 });
+        }
 
+        // Hash password
         const hashedPassword = await bcrypt.hash(password, 10);
 
+        // Generate unique code
+        const uniqueCode = await generateUniqueCode();
+
+        // Create new user
         const newUser = new User({
             name,
             email,
             password: hashedPassword,
-            phone, // Add phone
             code: uniqueCode,
-            interests,
-            facts,
+            phone,
+            interests: interests || [],
+            facts: facts || [],
+            connections: []
         });
 
         await newUser.save();
 
-        return NextResponse.json({ message: 'User registered successfully' });
+        return NextResponse.json({ message: 'User registered successfully' }, { status: 201 });
+
     } catch (error) {
-        console.error(error);
-        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+        console.error('Registration error:', error);
+        return NextResponse.json({ error: 'Something went wrong' }, { status: 500 });
     }
 }
