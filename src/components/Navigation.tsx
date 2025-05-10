@@ -1,18 +1,39 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Session } from "next-auth";
+import { useRouter, usePathname } from "next/navigation";
+import { signOut, useSession } from "next-auth/react";
 
 interface NavigationProps {
     session: Session | null;
 }
 
-export default function Navigation({ session }: NavigationProps) {
+export default function Navigation({ session: serverSession }: NavigationProps) {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const router = useRouter();
+    const pathname = usePathname();
+
+    // Use client-side session to ensure it's always up-to-date
+    const { data: clientSession } = useSession();
+
+    // Use the client session if available, otherwise fall back to server session
+    const session = clientSession || serverSession;
 
     const toggleMenu = () => {
         setIsMenuOpen(!isMenuOpen);
+    };
+
+    // Close menu when route changes
+    useEffect(() => {
+        setIsMenuOpen(false);
+    }, [pathname]);
+
+    const handleSignOut = async (e: React.MouseEvent) => {
+        e.preventDefault();
+        await signOut({ redirect: false });
+        router.push('/');
     };
 
     const navLinks = [
@@ -21,10 +42,16 @@ export default function Navigation({ session }: NavigationProps) {
         { name: "Connections", href: "/connections" },
     ];
 
+    // Add conditional links based on auth state
+    const authLinks = session ? [
+        ...navLinks,
+        { name: "Profile", href: "/profile" },
+    ] : navLinks;
+
     return (
         <nav className="w-full">
             <div className="container mx-auto max-w-6xl flex justify-between items-center">
-                <h1 className="text-xl font-bold flex items-center">
+                <Link href="/" className="text-xl font-bold flex items-center">
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
                         className="h-6 w-6 mr-2"
@@ -40,21 +67,35 @@ export default function Navigation({ session }: NavigationProps) {
                         />
                     </svg>
                     TDG Connect
-                </h1>
+                </Link>
+
+                {/* Desktop Navigation - hidden on mobile */}
+                <div className="hidden md:flex items-center space-x-6">
+                    {authLinks.map((link) => (
+                        <Link
+                            key={link.name}
+                            href={link.href}
+                            className={`text-white hover:text-gray-200 transition-colors ${pathname === link.href ? 'font-semibold border-b-2 border-white pb-1' : ''
+                                }`}
+                        >
+                            {link.name}
+                        </Link>
+                    ))}
+                </div>
 
                 <div className="flex items-center gap-4">
                     {/* Login/Logout button always visible */}
                     {session ? (
                         <div className="flex items-center">
-                            <span className="hidden md:inline mr-3">
+                            <span className="hidden md:inline mr-3 text-sm">
                                 Welcome, {session.user?.name || "User"}
                             </span>
-                            <Link
-                                href="/api/auth/signout"
+                            <button
+                                onClick={handleSignOut}
                                 className="community-btn bg-[#d1b89c] hover:bg-[#b29777] text-white px-3 py-1.5 rounded-full text-sm transition-colors"
                             >
                                 Logout
-                            </Link>
+                            </button>
                         </div>
                     ) : (
                         <Link
@@ -65,9 +106,9 @@ export default function Navigation({ session }: NavigationProps) {
                         </Link>
                     )}
 
-                    {/* Hamburger button - visible on all screen sizes */}
+                    {/* Hamburger button - visible on mobile only */}
                     <button
-                        className="flex items-center p-2"
+                        className="flex md:hidden items-center p-2"
                         onClick={toggleMenu}
                         aria-label="Toggle menu"
                     >
@@ -98,17 +139,18 @@ export default function Navigation({ session }: NavigationProps) {
                 </div>
             </div>
 
-            {/* Navigation menu - slides down when menu is open (on all screen sizes) */}
+            {/* Mobile Navigation menu - slides down when menu is open */}
             <div
                 className={`bg-[#7bb5d3] w-full transition-all duration-300 ease-in-out overflow-hidden ${isMenuOpen ? "max-h-96" : "max-h-0"
                     }`}
             >
                 <div className="flex flex-col p-4 space-y-3 container mx-auto max-w-6xl">
-                    {navLinks.map((link) => (
+                    {authLinks.map((link) => (
                         <Link
                             key={link.name}
                             href={link.href}
-                            className="text-white hover:text-gray-200 transition-colors text-lg"
+                            className={`text-white hover:text-gray-200 transition-colors text-lg ${pathname === link.href ? 'font-semibold' : ''
+                                }`}
                             onClick={() => setIsMenuOpen(false)}
                         >
                             {link.name}
