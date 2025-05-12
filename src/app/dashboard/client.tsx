@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Session } from "next-auth";
+import Swal from 'sweetalert2';
 
 interface Connection {
     _id: string;
@@ -61,6 +62,12 @@ export default function DashboardClient({ session }: { session: Session | null }
             } catch (err) {
                 setError('Failed to fetch your connections');
                 console.error(err);
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Failed to fetch your connections',
+                    icon: 'error',
+                    confirmButtonColor: '#7bb5d3'
+                });
             } finally {
                 setLoading(false);
             }
@@ -91,16 +98,46 @@ export default function DashboardClient({ session }: { session: Session | null }
                 connectionId: connection._id,
                 text: data.conversationStarter
             });
+
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: 'success',
+                title: 'Conversation starter generated!',
+                showConfirmButton: false,
+                timer: 1500
+            });
         } catch (err) {
             console.error('Error generating conversation starter:', err);
             setActiveConversationStarter({
                 connectionId: connection._id,
                 text: 'Failed to generate a conversation starter. Please try again.'
             });
+
+            Swal.fire({
+                title: 'Error',
+                text: 'Failed to generate conversation starter',
+                icon: 'error',
+                confirmButtonColor: '#7bb5d3'
+            });
         } finally {
             setGeneratingStarter(false);
         }
     }
+
+    const copyCode = () => {
+        if (session?.user?.code) {
+            navigator.clipboard.writeText(session.user.code);
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: 'success',
+                title: 'Code copied to clipboard!',
+                showConfirmButton: false,
+                timer: 1500
+            });
+        }
+    };
 
     const activeConnections = connections.filter(conn => !conn.isDisconnected);
 
@@ -188,7 +225,10 @@ export default function DashboardClient({ session }: { session: Session | null }
                             <div className="text-xs text-gray-500 mt-1">share to connect</div>
                         </div>
                     </div>
-                    <button className="mt-2 w-full py-2 border border-[#d1b89c] text-[#d1b89c] rounded-md text-sm hover:bg-[#f9f0e6] transition-colors">
+                    <button
+                        className="mt-2 w-full py-2 border border-[#d1b89c] text-[#d1b89c] rounded-md text-sm hover:bg-[#f9f0e6] transition-colors"
+                        onClick={copyCode}
+                    >
                         Copy Code
                     </button>
                 </div>
@@ -219,8 +259,6 @@ export default function DashboardClient({ session }: { session: Session | null }
                     </div>
                 </div>
             </div>
-
-           
 
             {/* Connections section */}
             <div className="community-card p-6 border border-gray-100">

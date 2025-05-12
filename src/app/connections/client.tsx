@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Swal from 'sweetalert2';
 
 interface Connection {
   _id: string;
@@ -48,7 +49,12 @@ export default function ConnectionClient({ userCode }: ConnectionClientProps) {
       setConnections(data.connections);
     } catch (error) {
       console.error('Error fetching connections:', error);
-      setMessage({ text: 'Failed to load connections', type: 'error' });
+      Swal.fire({
+        title: 'Error',
+        text: 'Failed to load connections',
+        icon: 'error',
+        confirmButtonColor: '#7bb5d3'
+      });
     } finally {
       setIsLoading(false);
     }
@@ -75,17 +81,41 @@ export default function ConnectionClient({ userCode }: ConnectionClientProps) {
         throw new Error(data.error || 'Failed to record connection');
       }
 
-      setMessage({ text: 'Connection recorded successfully!', type: 'success' });
+      Swal.fire({
+        title: 'Success!',
+        text: 'Connection recorded successfully!',
+        icon: 'success',
+        confirmButtonColor: '#7bb5d3'
+      });
+
       setConnectionCode('');
       fetchConnections(); // Refresh the connections list
     } catch (err: unknown) {
-      setMessage({ text: err instanceof Error ? err.message : 'An error occurred', type: 'error' });
+      Swal.fire({
+        title: 'Error',
+        text: err instanceof Error ? err.message : 'An error occurred',
+        icon: 'error',
+        confirmButtonColor: '#7bb5d3'
+      });
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const disconnectUser = async (connectionId: string) => {
+    // Confirm before disconnecting
+    const result = await Swal.fire({
+      title: 'Are you sure?',
+      text: "You will disconnect this user from your network. You can always connect again later.",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#7bb5d3',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, disconnect'
+    });
+
+    if (!result.isConfirmed) return;
+
     try {
       const response = await fetch('/api/connections', {
         method: 'DELETE',
@@ -109,10 +139,20 @@ export default function ConnectionClient({ userCode }: ConnectionClientProps) {
       delete updatedSharedEmails[connectionId];
       setSharedEmails(updatedSharedEmails);
 
-      setMessage({ text: 'Connection disconnected successfully', type: 'success' });
+      Swal.fire({
+        title: 'Disconnected',
+        text: 'Connection disconnected successfully',
+        icon: 'success',
+        confirmButtonColor: '#7bb5d3'
+      });
     } catch (error) {
       console.error('Error disconnecting user:', error);
-      setMessage({ text: 'Failed to disconnect user', type: 'error' });
+      Swal.fire({
+        title: 'Error',
+        text: 'Failed to disconnect user',
+        icon: 'error',
+        confirmButtonColor: '#7bb5d3'
+      });
     }
   };
 
@@ -134,15 +174,42 @@ export default function ConnectionClient({ userCode }: ConnectionClientProps) {
         ...prev,
         [connectionId]: data.conversationStarter
       }));
+
+      Swal.fire({
+        toast: true,
+        position: 'top-end',
+        icon: 'success',
+        title: 'Conversation starter generated!',
+        showConfirmButton: false,
+        timer: 1500
+      });
     } catch (error) {
       console.error('Error generating conversation starter:', error);
-      setMessage({ text: 'Failed to generate conversation starter', type: 'error' });
+      Swal.fire({
+        title: 'Error',
+        text: 'Failed to generate conversation starter',
+        icon: 'error',
+        confirmButtonColor: '#7bb5d3'
+      });
     } finally {
       setGeneratingFor(null);
     }
   };
 
   const shareEmail = async (connectionId: string) => {
+    // Confirm before sharing email
+    const result = await Swal.fire({
+      title: 'Share Email?',
+      text: "Your email will be shared with this connection. Continue?",
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#7bb5d3',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, share email'
+    });
+
+    if (!result.isConfirmed) return;
+
     try {
       const response = await fetch('/api/connections/share-email', {
         method: 'POST',
@@ -158,11 +225,34 @@ export default function ConnectionClient({ userCode }: ConnectionClientProps) {
         ...prev,
         [connectionId]: true
       }));
-      setMessage({ text: 'Email shared successfully', type: 'success' });
+
+      Swal.fire({
+        title: 'Shared',
+        text: 'Email shared successfully',
+        icon: 'success',
+        confirmButtonColor: '#7bb5d3'
+      });
     } catch (error) {
       console.error('Error sharing email:', error);
-      setMessage({ text: 'Failed to share email', type: 'error' });
+      Swal.fire({
+        title: 'Error',
+        text: 'Failed to share email',
+        icon: 'error',
+        confirmButtonColor: '#7bb5d3'
+      });
     }
+  };
+
+  const copyCode = async () => {
+    await navigator.clipboard.writeText(userCode);
+    Swal.fire({
+      toast: true,
+      position: 'top-end',
+      icon: 'success',
+      title: 'Code copied to clipboard!',
+      showConfirmButton: false,
+      timer: 1500
+    });
   };
 
   return (
@@ -217,13 +307,9 @@ export default function ConnectionClient({ userCode }: ConnectionClientProps) {
           </div>
           <button
             className="mt-2 w-full py-2 border border-[#7bb5d3] text-[#7bb5d3] rounded-md text-sm hover:bg-[#e6f2ff] transition-colors"
-            onClick={async () => {
-              await navigator.clipboard.writeText(userCode);
-              setCopied(true);
-              setTimeout(() => setCopied(false), 1500);
-            }}
+            onClick={copyCode}
           >
-            {copied ? 'Copied!' : 'Copy Code'}
+            Copy Code
           </button>
         </div>
 

@@ -4,10 +4,10 @@ import { useState, ChangeEvent, FormEvent } from 'react';
 import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Swal from 'sweetalert2';
 
 export default function LoginPage() {
   const [formData, setFormData] = useState({ email: '', password: '' });
-  const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
@@ -18,18 +18,34 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setError(null);
     setLoading(true);
+
     const result = await signIn('credentials', {
       redirect: false,
       email: formData.email,
       password: formData.password,
     });
+
     setLoading(false);
+
     if (result?.error) {
-      setError(result.error);
+      Swal.fire({
+        title: 'Login Failed',
+        text: result.error,
+        icon: 'error',
+        confirmButtonColor: '#7bb5d3'
+      });
     } else {
-      router.push('/');
+      Swal.fire({
+        title: 'Success!',
+        text: 'You have been logged in successfully.',
+        icon: 'success',
+        confirmButtonColor: '#7bb5d3',
+        timer: 1500,
+        showConfirmButton: false
+      }).then(() => {
+        router.push('/');
+      });
     }
   };
 
@@ -46,11 +62,6 @@ export default function LoginPage() {
           <p className="text-[#777777] mt-1">Sign in to connect with your community</p>
         </div>
 
-        {error && (
-          <div className="mb-4 p-3 bg-[#f9e5e5] text-red-700 rounded-lg">
-            {error}
-          </div>
-        )}
         {loading && (
           <div className="mb-4 p-3 bg-[#e6f2ea] text-blue-700 rounded-lg">
             Signing in...

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Swal from 'sweetalert2';
 
 interface ProfileClientProps {
     user: {
@@ -60,9 +61,25 @@ export default function ProfileClient({ user }: ProfileClientProps) {
             setSaveStatus('success');
             setIsEditing(false);
             setNewInterest('');
+
+            Swal.fire({
+                title: 'Success!',
+                text: 'Profile updated successfully!',
+                icon: 'success',
+                confirmButtonColor: '#7bb5d3',
+                timer: 2000,
+                showConfirmButton: false
+            });
         } catch (err) {
             setSaveStatus('error');
             setSaveError(err instanceof Error ? err.message : 'An error occurred');
+
+            Swal.fire({
+                title: 'Error',
+                text: err instanceof Error ? err.message : 'Failed to update profile',
+                icon: 'error',
+                confirmButtonColor: '#7bb5d3'
+            });
         }
     };
 
@@ -81,31 +98,40 @@ export default function ProfileClient({ user }: ProfileClientProps) {
 
             const data = await response.json();
             setInviteImageUrl(data.inviteImageUrl);
-
-            // Show a confirmation briefly
-            const successMessage = document.createElement('div');
-            successMessage.className = 'fixed top-4 right-4 bg-green-600 text-white px-4 py-2 rounded-lg shadow-lg z-50';
-            successMessage.textContent = 'Invitation image generated successfully!';
-            document.body.appendChild(successMessage);
-
-            setTimeout(() => {
-                document.body.removeChild(successMessage);
-            }, 3000);
-
             setRegeneratingInvite(false);
+
+            Swal.fire({
+                title: 'Success!',
+                text: 'Invitation image generated successfully!',
+                icon: 'success',
+                confirmButtonColor: '#7bb5d3',
+                timer: 2000,
+                showConfirmButton: false
+            });
         } catch (err) {
             console.error('Error generating invitation:', err);
             setRegeneratingInvite(false);
 
-            // Show error message
-            const errorMessage = document.createElement('div');
-            errorMessage.className = 'fixed top-4 right-4 bg-red-600 text-white px-4 py-2 rounded-lg shadow-lg z-50';
-            errorMessage.textContent = 'Failed to generate invitation image. Please try again.';
-            document.body.appendChild(errorMessage);
+            Swal.fire({
+                title: 'Error',
+                text: 'Failed to generate invitation image. Please try again.',
+                icon: 'error',
+                confirmButtonColor: '#7bb5d3'
+            });
+        }
+    };
 
-            setTimeout(() => {
-                document.body.removeChild(errorMessage);
-            }, 3000);
+    const copyCode = () => {
+        if (user.code) {
+            navigator.clipboard.writeText(user.code);
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: 'success',
+                title: 'Code copied to clipboard!',
+                showConfirmButton: false,
+                timer: 1500
+            });
         }
     };
 
@@ -189,7 +215,16 @@ export default function ProfileClient({ user }: ProfileClientProps) {
 
                         <div>
                             <label className="block text-sm font-medium text-gray-500 mb-1">Connection Code</label>
-                            <div className="p-3 bg-gray-50 rounded-lg font-mono">{user.code}</div>
+                            <div className="p-3 bg-gray-50 rounded-lg font-mono flex items-center justify-between">
+                                {user.code}
+                                <button
+                                    onClick={copyCode}
+                                    className="text-[#7bb5d3] hover:text-[#5a9cbf] focus:outline-none"
+                                    aria-label="Copy code"
+                                >
+                                    Copy
+                                </button>
+                            </div>
                         </div>
 
                         <div className="flex justify-end">
@@ -375,4 +410,4 @@ export default function ProfileClient({ user }: ProfileClientProps) {
             )}
         </div>
     );
-} 
+}
