@@ -88,13 +88,20 @@ export async function generateInviteImage(userName: string): Promise<{ filePath:
     }
     const fileName = `invite_${Date.now()}.png`;
     const filePath = path.join(publicDir, fileName);
+    // Always ensure the publicPath has the correct /invites/ prefix
     const publicPath = `/invites/${fileName}`;
 
     // Write the image to the file system
     const buffer = canvas.toBuffer('image/png');
     fs.writeFileSync(filePath, buffer);
 
-    console.log(`Generated image saved to ${filePath} with public URL ${publicPath}`);
+    // Verify the file was written successfully
+    if (fs.existsSync(filePath)) {
+        const stats = fs.statSync(filePath);
+        console.log(`Generated image saved to ${filePath} (${stats.size} bytes) with public URL ${publicPath}`);
+    } else {
+        console.error(`Failed to save image to ${filePath}`);
+    }
 
     return { filePath, publicUrl: publicPath };
 }
@@ -109,6 +116,7 @@ export async function generateUserInvite(name: string, code?: string): Promise<{
 
         // Generate the invite image
         const imageResult = await generateInviteImage(name);
+        // Get the correctly formatted URL from the image generation result
         const { publicUrl } = imageResult;
 
         console.log(`Successfully generated invite image: ${publicUrl}`);
@@ -116,13 +124,10 @@ export async function generateUserInvite(name: string, code?: string): Promise<{
         // Generate a code if not provided
         const inviteCode = code || Math.floor(1000 + Math.random() * 9000).toString();
 
-        // Make sure publicUrl has the correct format with /invites/ prefix
-        const correctedUrl = publicUrl.startsWith('/invites/') ? publicUrl : `/invites${publicUrl}`;
-
-        console.log(`Successfully generated invitation image: ${correctedUrl}`);
+        console.log(`Successfully generated invitation image: ${publicUrl}`);
 
         return {
-            publicUrl: correctedUrl,
+            publicUrl,
             code: inviteCode
         };
     } catch (error) {

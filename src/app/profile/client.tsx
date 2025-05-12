@@ -97,10 +97,21 @@ export default function ProfileClient({ user }: ProfileClientProps) {
             }
 
             const data = await response.json();
-            // Ensure the URL has the correct path format
-            const url = data.inviteImageUrl;
-            const correctedUrl = url.startsWith('/invites/') ? url : `/invites${url}`;
-            setInviteImageUrl(correctedUrl);
+
+            // Store both URLs - we'll try the regular one first, fallback to API route if needed
+            // Store in component state as an object with both URLs
+            const publicUrl = data.inviteImageUrl;
+            const apiUrl = data.apiImageUrl || `/api/invites/${publicUrl.split('/').pop()}`;
+
+            // Set the primary URL to the public one, we'll fallback to API if needed
+            setInviteImageUrl(publicUrl);
+
+            // Also store API URL in localStorage for potential fallback
+            if (typeof window !== 'undefined') {
+                localStorage.setItem('lastInviteApiUrl', apiUrl);
+                localStorage.setItem('lastInvitePublicUrl', publicUrl);
+            }
+
             setRegeneratingInvite(false);
 
             Swal.fire({
@@ -124,10 +135,28 @@ export default function ProfileClient({ user }: ProfileClientProps) {
         }
     };
 
-    // Format image URL helper function to ensure path correctness
+    // Format image URL helper function with API fallback
     const formatImageUrl = (url: string | undefined) => {
         if (!url) return '';
-        return url.startsWith('/invites/') ? url : `/invites${url}`;
+
+        // First ensure it has the correct /invites/ prefix for normal public path
+        const formattedUrl = url.startsWith('/invites/') ? url : `/invites${url}`;
+
+        // For debugging purposes, log the URL
+        console.log('Image URL being used:', formattedUrl);
+
+        // Generate API fallback URL (will be used in image onError handler)
+        const filename = formattedUrl.split('/').pop();
+
+        // Return the properly formatted URL
+        return formattedUrl;
+    };
+
+    // Get API URL version for a given image filename
+    const getApiFallbackUrl = (url: string | undefined) => {
+        if (!url) return '';
+        const filename = url.split('/').pop();
+        return `/api/invites/${filename}`;
     };
 
     const copyCode = () => {
@@ -384,16 +413,74 @@ export default function ProfileClient({ user }: ProfileClientProps) {
 
                     <div className="space-y-4">
                         <div className="flex flex-col items-center">
+                            {/* Debug information */}
+                            <div className="bg-gray-100 p-4 mb-4 rounded-lg w-full">
+                                <p className="font-mono text-xs text-gray-700">Debug info:</p>
+                                <p className="font-mono text-xs text-gray-700">Original URL: {inviteImageUrl || user.inviteImageUrl}</p>
+                                <p className="font-mono text-xs text-gray-700">Formatted URL: {formatImageUrl(inviteImageUrl || user.inviteImageUrl)}</p>
+                                <p className="font-mono text-xs text-gray-700">API Fallback URL: {getApiFallbackUrl(inviteImageUrl || user.inviteImageUrl)}</p>
+                                <div className="mt-2">
+                                    <button
+                                        onClick={() => window.open(formatImageUrl(inviteImageUrl || user.inviteImageUrl), '_blank')}
+                                        className="bg-blue-500 text-white text-xs px-2 py-1 rounded mr-2"
+                                    >
+                                        Test Public URL
+                                    </button>
+                                    <button
+                                        onClick={() => window.open(getApiFallbackUrl(inviteImageUrl || user.inviteImageUrl), '_blank')}
+                                        className="bg-green-500 text-white text-xs px-2 py-1 rounded"
+                                    >
+                                        Test API URL
+                                    </button>
+                                </div>
+                            </div>
+
                             <img
                                 src={formatImageUrl(inviteImageUrl || user.inviteImageUrl)}
                                 alt="Daily Grind Season 3 Invitation"
                                 className="max-w-full rounded-lg shadow-lg mb-4"
                                 style={{ maxHeight: '400px' }}
+                                onError={(e) => {
+                                    console.error('Public image URL failed to load, trying API fallback');
+                                    // Get the current image source
+                                    const currentSrc = (e.target as HTMLImageElement).src;
+                                    // Check if we're already using the API fallback
+                                    if (currentSrc.includes('/api/invites/')) {
+                                        console.error('Both image sources failed to load');
+                                        (e.target as HTMLImageElement).style.border = '2px solid red';
+                                        (e.target as HTMLImageElement).style.padding = '10px';
+                                        (e.target as HTMLImageElement).alt = 'Image failed to load';
+                                        return;
+                                    }
+
+                                    // Try the API fallback URL
+                                    const filename = currentSrc.split('/').pop();
+                                    if (filename) {
+                                        const fallbackUrl = getApiFallbackUrl(inviteImageUrl || user.inviteImageUrl);
+                                        console.log('Trying fallback URL:', fallbackUrl);
+                                        (e.target as HTMLImageElement).src = fallbackUrl;
+                                    } else {
+                                        (e.target as HTMLImageElement).alt = 'Image failed to load';
+                                    }
+                                }}
                             />
                             <p className="text-gray-600 mb-4">Share this image on social media with the hashtag <span className="font-bold">#DailyGrindS3</span></p>
                             <div className="flex flex-wrap gap-4 justify-center">
                                 <a
                                     href={formatImageUrl(inviteImageUrl || user.inviteImageUrl)}
+                                    onClick={(e) => {
+                                        // If the user clicks download and we know the public URL might not work,
+                                        // try to use the API URL instead
+                                        const storedApiUrl = localStorage.getItem('lastInviteApiUrl');
+                                        const storedPublicUrl = localStorage.getItem('lastInvitePublicUrl');
+                                        const currentUrl = formatImageUrl(inviteImageUrl || user.inviteImageUrl);
+
+                                        // If we have a stored API URL and the current URL matches the stored public URL
+                                        if (storedApiUrl && storedPublicUrl === currentUrl) {
+                                            // Update the href to use the API URL
+                                            (e.currentTarget as HTMLAnchorElement).href = storedApiUrl;
+                                        }
+                                    }}
                                     download="daily-grind-invitation.png"
                                     className="bg-[#7bb5d3] text-white py-2 px-6 rounded-full hover:bg-[#5a9cbf] transition-all transform hover:scale-105 shadow-md flex items-center"
                                 >

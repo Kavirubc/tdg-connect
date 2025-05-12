@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
         const inviteResult = await generateUserInvite(user.name, user.code);
         const { publicUrl } = inviteResult;
 
-        // Update user with new image URL
+        // Update user with new image URL (store the public URL in the database)
         user.inviteImageUrl = publicUrl;
         await user.save();
 
