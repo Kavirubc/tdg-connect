@@ -2,9 +2,27 @@ import Link from "next/link";
 import Image from "next/image";
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
+import { connectToDatabase } from '@/lib/mongodb';
+import User from '@/models/User';
+import InvitationView from '@/components/InvitationView';
 
 export default async function Home() {
   const session = await getServerSession(authOptions);
+
+  // Get full user data including invitation image URL if user is logged in
+  let userData = null;
+  if (session?.user?.email) {
+    await connectToDatabase();
+    const user = await User.findOne({ email: session.user.email });
+    if (user) {
+      userData = {
+        _id: user._id.toString(),
+        name: user.name,
+        email: user.email,
+        inviteImageUrl: user.inviteImageUrl
+      };
+    }
+  }
 
   // If user is logged in, show personalized view
   if (session) {
@@ -40,10 +58,14 @@ export default async function Home() {
           </div>
         </section>
 
-        
-
-        {/* Suggested Connections */}
-       
+        {/* Daily Grind Invitation Section */}
+        {userData && (
+          <section className="py-8">
+            <div className="max-w-4xl mx-auto px-4">
+              <InvitationView user={userData} />
+            </div>
+          </section>
+        )}
       </div>
     );
   }
@@ -89,12 +111,6 @@ export default async function Home() {
           </div>
         </div>
       </section>
-
-      {/* Features Section */}
-     
-
-      {/* Testimonials Section */}
-      
     </div>
   );
 }

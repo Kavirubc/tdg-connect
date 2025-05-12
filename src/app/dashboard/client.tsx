@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Session } from "next-auth";
 import Swal from 'sweetalert2';
+import InvitationView from '@/components/InvitationView';
 
 interface Connection {
     _id: string;
@@ -24,7 +25,14 @@ interface RankingInfo {
     tier: string;
 }
 
-export default function DashboardClient({ session }: { session: Session | null }) {
+interface UserData {
+    _id: string;
+    name: string;
+    email: string;
+    inviteImageUrl?: string;
+}
+
+export default function DashboardClient({ session, userData }: { session: Session | null, userData: UserData | null }) {
     const [connections, setConnections] = useState<Connection[]>([]);
     const [totalConnections, setTotalConnections] = useState(0);
     const [rankingInfo, setRankingInfo] = useState<RankingInfo>({ rank: 0, tier: 'Newcomer' });
@@ -259,6 +267,13 @@ export default function DashboardClient({ session }: { session: Session | null }
                     </div>
                 </div>
             </div>
+
+            {/* Daily Grind Invitation Section */}
+            {userData && (
+                <div className="mb-8">
+                    <InvitationView user={userData} compact={true} />
+                </div>
+            )}
 
             {/* Connections section */}
             <div className="community-card p-6 border border-gray-100">

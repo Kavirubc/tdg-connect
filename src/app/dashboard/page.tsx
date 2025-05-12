@@ -2,6 +2,8 @@ import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
 import Link from 'next/link';
 import DashboardClient from './client';
+import { connectToDatabase } from '@/lib/mongodb';
+import User from '@/models/User';
 
 export default async function Dashboard() {
     const session = await getServerSession(authOptions);
@@ -25,5 +27,20 @@ export default async function Dashboard() {
         );
     }
 
-    return <DashboardClient session={session} />;
+    // Get full user data including invitation image URL
+    let userData = null;
+    if (session?.user?.email) {
+        await connectToDatabase();
+        const user = await User.findOne({ email: session.user.email });
+        if (user) {
+            userData = {
+                _id: user._id.toString(),
+                name: user.name,
+                email: user.email,
+                inviteImageUrl: user.inviteImageUrl
+            };
+        }
+    }
+
+    return <DashboardClient session={session} userData={userData} />;
 }
