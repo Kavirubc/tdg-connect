@@ -76,15 +76,36 @@ export default function ProfileClient({ user }: ProfileClientProps) {
 
             if (!response.ok) {
                 const data = await response.json();
-                throw new Error(data.error || 'Failed to regenerate invitation image');
+                throw new Error(data.error || 'Failed to generate invitation image');
             }
 
             const data = await response.json();
             setInviteImageUrl(data.inviteImageUrl);
+
+            // Show a confirmation briefly
+            const successMessage = document.createElement('div');
+            successMessage.className = 'fixed top-4 right-4 bg-green-600 text-white px-4 py-2 rounded-lg shadow-lg z-50';
+            successMessage.textContent = 'Invitation image generated successfully!';
+            document.body.appendChild(successMessage);
+
+            setTimeout(() => {
+                document.body.removeChild(successMessage);
+            }, 3000);
+
             setRegeneratingInvite(false);
         } catch (err) {
-            console.error('Error regenerating invitation:', err);
+            console.error('Error generating invitation:', err);
             setRegeneratingInvite(false);
+
+            // Show error message
+            const errorMessage = document.createElement('div');
+            errorMessage.className = 'fixed top-4 right-4 bg-red-600 text-white px-4 py-2 rounded-lg shadow-lg z-50';
+            errorMessage.textContent = 'Failed to generate invitation image. Please try again.';
+            document.body.appendChild(errorMessage);
+
+            setTimeout(() => {
+                document.body.removeChild(errorMessage);
+            }, 3000);
         }
     };
 
@@ -272,6 +293,34 @@ export default function ProfileClient({ user }: ProfileClientProps) {
             )}
             {saveStatus === 'error' && saveError && (
                 <div className="mt-2 text-red-600 text-sm">{saveError}</div>
+            )}
+
+            {/* Generate Invitation Button (only shown if no invitation exists) */}
+            {!user.inviteImageUrl && !inviteImageUrl && (
+                <div className="community-card p-6 border border-gray-100 mb-6">
+                    <div className="flex items-center mb-4">
+                        <div className="bg-[#f0e6f9] p-3 rounded-full mr-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-[#9c7bd1]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <div className="text-sm font-medium text-gray-500 uppercase tracking-wide">Daily Grind Season 3</div>
+                            <div className="text-2xl font-bold text-[#333333]">Create Your Invitation</div>
+                        </div>
+                    </div>
+                    <p className="text-gray-600 mb-4">Generate a shareable image for social media to show you'll be attending Daily Grind Season 3!</p>
+                    <button
+                        onClick={handleRegenerateInvite}
+                        disabled={regeneratingInvite}
+                        className="bg-[#7bb5d3] text-white py-2 px-6 rounded-lg hover:bg-[#5a9cbf] transition-all flex items-center mx-auto"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        {regeneratingInvite ? 'Generating...' : 'Generate Invitation Image'}
+                    </button>
+                </div>
             )}
 
             {/* Daily Grind Invitation Card */}

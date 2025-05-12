@@ -58,8 +58,22 @@ export default function RegisterPage() {
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Registration failed');
 
+      // Show success message with information about invitation
       setSuccess(true);
       setLoading(false);
+
+      // Add a notification about the invitation
+      if (data.inviteImageUrl) {
+        const successMessage = document.createElement('div');
+        successMessage.className = 'fixed top-4 right-4 bg-green-600 text-white px-4 py-3 rounded-lg shadow-lg z-50';
+        successMessage.innerHTML = 'Registration successful! <br> Your Daily Grind invitation image has been created and will be available in your profile.';
+        document.body.appendChild(successMessage);
+
+        setTimeout(() => {
+          document.body.removeChild(successMessage);
+        }, 5000);
+      }
+
       // Redirect to login page after a brief delay
       setTimeout(() => {
         router.push('/auth/login');
@@ -90,6 +104,14 @@ export default function RegisterPage() {
         {error && (
           <div className="mb-4 p-3 bg-[#f9e5e5] text-red-700 rounded-lg">
             {error}
+          </div>
+        )}
+
+        {success && (
+          <div className="mb-4 p-3 bg-[#e6f7e6] text-green-700 rounded-lg">
+            <p className="font-medium">Registration successful!</p>
+            <p>Your Daily Grind invitation has been created.</p>
+            <p>Redirecting to login page...</p>
           </div>
         )}
 

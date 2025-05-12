@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongodb';
 import User from '@/models/User';
 import bcrypt from 'bcryptjs';
-import { sendInviteEmail } from '@/lib/email-utils';
+import { generateUserInvite } from '@/lib/email-utils';
 
 // Function to generate a unique 4-digit code
 async function generateUniqueCode(): Promise<string> {
@@ -41,7 +41,19 @@ export async function POST(request: Request) {
         // Generate unique code
         const uniqueCode = await generateUniqueCode();
 
-        // Create new user
+        // Generate user invite with the PNG image first
+        let inviteImageUrl = '';
+        try {
+            console.log('Generating invitation image for new user...');
+            const inviteResult = await generateUserInvite(name, uniqueCode);
+            inviteImageUrl = inviteResult.publicUrl;
+            console.log('Successfully generated invitation image:', inviteImageUrl);
+        } catch (inviteError) {
+            console.error('Error generating invitation:', inviteError);
+            // Continue with the registration even if invite generation fails
+        }
+
+        // Create new user with the invitation image URL
         const newUser = new User({
             name,
             email,
@@ -52,26 +64,17 @@ export async function POST(request: Request) {
             organization,
             interests: interests || [],
             facts: facts || [],
-            connections: []
+            connections: [],
+            inviteImageUrl: inviteImageUrl // Include the invitation image URL at creation time
         });
 
         await newUser.save();
+        console.log('User saved with ID:', newUser._id, 'and invitation URL:', inviteImageUrl);
 
-        // Send invite email with the PNG image
-        let imageUrl = '';
-        try {
-            imageUrl = await sendInviteEmail(email, name, uniqueCode);
-        } catch (emailError) {
-            console.error('Error sending invitation email:', emailError);
-            // Continue with the response even if email fails
-        }
-
-        // Update user with image URL if available
-        if (imageUrl) {
-            await User.findByIdAndUpdate(newUser._id, { inviteImageUrl: imageUrl });
-        }
-
-        return NextResponse.json({ message: 'User registered successfully' }, { status: 201 });
+        return NextResponse.json({
+            message: 'User registered successfully',
+            inviteImageUrl: inviteImageUrl // Include the invitation URL in the response for client-side confirmation
+        }, { status: 201 });
 
     } catch (error) {
         console.error('Registration error:', error);

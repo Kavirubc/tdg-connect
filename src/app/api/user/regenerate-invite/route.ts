@@ -3,7 +3,7 @@ import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
 import User from '@/models/User';
 import { connectToDatabase } from '@/lib/mongodb';
-import { generateInviteImage } from '@/lib/email-utils';
+import { generateUserInvite } from '@/lib/email-utils';
 
 export async function POST(req: NextRequest) {
     try {
@@ -21,8 +21,8 @@ export async function POST(req: NextRequest) {
         }
 
         // Generate new invite image
-        const imageResult = await generateInviteImage(user.name);
-        const { publicUrl } = imageResult;
+        const inviteResult = await generateUserInvite(user.name, user.code);
+        const { publicUrl } = inviteResult;
 
         // Update user with new image URL
         user.inviteImageUrl = publicUrl;

@@ -1,23 +1,21 @@
-import nodemailer from 'nodemailer';
 import { createCanvas } from 'canvas';
 import fs from 'fs';
 import path from 'path';
 
-// Create the email transporter
-const createTransporter = () => {
-    return nodemailer.createTransport({
-        host: 'smtp.gmail.com',
-        port: 465,
-        secure: true,
-        auth: {
-            user: process.env.EMAIL_USER,
-            pass: process.env.EMAIL_APP_PASSWORD,
-        },
-    });
-};
+// Ensure the invites directory exists
+function ensureInvitesDirectory() {
+    const publicDir = path.join(process.cwd(), 'public', 'invites');
+    if (!fs.existsSync(publicDir)) {
+        console.log('Creating invites directory at:', publicDir);
+        fs.mkdirSync(publicDir, { recursive: true });
+    }
+}
 
 // Generate a "Daily Grind Season 3 - I'll be there" PNG image
 export async function generateInviteImage(userName: string): Promise<{ filePath: string, publicUrl: string }> {
+    // Ensure the invites directory exists
+    ensureInvitesDirectory();
+
     // Create a canvas (1x1 aspect ratio)
     const size = 1200; // 1200x1200 px for better quality on social media
     const canvas = createCanvas(size, size);
@@ -99,59 +97,29 @@ export async function generateInviteImage(userName: string): Promise<{ filePath:
     return { filePath, publicUrl: publicPath };
 }
 
-// Send email with the invite image
-export async function sendInviteEmail(email: string, name: string, code?: string): Promise<string> {
+// Generate invite without sending email
+export async function generateUserInvite(name: string, code?: string): Promise<{ publicUrl: string, code: string }> {
     try {
-        const transporter = createTransporter();
+        // Ensure directories exist first
+        ensureInvitesDirectory();
+
+        console.log(`Generating invite image for user: ${name}, code: ${code || 'not provided'}`);
 
         // Generate the invite image
         const imageResult = await generateInviteImage(name);
-        const { filePath, publicUrl } = imageResult;
+        const { publicUrl } = imageResult;
 
-        // Send email with the image attached
-        await transporter.sendMail({
-            from: `"Daily Grind Team" <${process.env.EMAIL_USER}>`,
-            to: email,
-            subject: 'Daily Grind Season 3 - Your Shareable Invitation!',
-            html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #333333;">
-          <div style="background-color: #f8f1e6; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
-            <h1 style="color: #7b5c3d; text-align: center;">Welcome to Daily Grind Season 3!</h1>
-            <p style="font-size: 16px;">Hi ${name},</p>
-            <p style="font-size: 16px;">Thank you for registering for Daily Grind Season 3! We're excited to have you join our community.</p>
-            <p style="font-size: 16px; font-weight: bold;">Your unique code: <span style="color: #7b5c3d; background-color: #e9dcc9; padding: 5px 10px; border-radius: 5px;">${code || Math.floor(1000 + Math.random() * 9000)}</span></p>
-            <p style="font-size: 16px;">Use this code to connect with other members of the community.</p>
-          </div>
-          
-          <div style="background-color: #f5f5f5; padding: 20px; border-radius: 10px;">
-            <h2 style="color: #333333; text-align: center;">Share Your Excitement!</h2>
-            <p style="font-size: 16px;">We've attached a special image for you to share on social media. Let everyone know you'll be at Daily Grind Season 3!</p>
-            <p style="font-size: 16px;">Simply download the attached image and post it on your favorite social platform with the hashtag <strong>#DailyGrindS3</strong>.</p>
-            <div style="text-align: center; margin: 20px 0;">
-              <img src="cid:unique-invite-image" alt="Daily Grind Season 3 Invitation" style="max-width: 100%; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);" />
-            </div>
-          </div>
-          
-          <div style="margin-top: 30px; text-align: center; color: #777777; font-size: 14px;">
-            <p>We look forward to seeing you at the event!</p>
-            <p>The Daily Grind Team</p>
-          </div>
-        </div>
-      `,
-            attachments: [
-                {
-                    filename: 'daily-grind-invitation.png',
-                    path: filePath,
-                    cid: 'unique-invite-image' // This embeds the image in the email body
-                }
-            ]
-        });
+        console.log(`Successfully generated invite image: ${publicUrl}`);
 
-        // Return the public URL of the image
-        return publicUrl;
+        // Generate a code if not provided
+        const inviteCode = code || Math.floor(1000 + Math.random() * 9000).toString();
 
+        return {
+            publicUrl,
+            code: inviteCode
+        };
     } catch (error) {
-        console.error('Error sending email:', error);
+        console.error('Error generating invite:', error);
         throw error;
     }
 }
