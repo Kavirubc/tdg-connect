@@ -97,7 +97,10 @@ export default function ProfileClient({ user }: ProfileClientProps) {
             }
 
             const data = await response.json();
-            setInviteImageUrl(data.inviteImageUrl);
+            // Ensure the URL has the correct path format
+            const url = data.inviteImageUrl;
+            const correctedUrl = url.startsWith('/invites/') ? url : `/invites${url}`;
+            setInviteImageUrl(correctedUrl);
             setRegeneratingInvite(false);
 
             Swal.fire({
@@ -119,6 +122,12 @@ export default function ProfileClient({ user }: ProfileClientProps) {
                 confirmButtonColor: '#7bb5d3'
             });
         }
+    };
+
+    // Format image URL helper function to ensure path correctness
+    const formatImageUrl = (url: string | undefined) => {
+        if (!url) return '';
+        return url.startsWith('/invites/') ? url : `/invites${url}`;
     };
 
     const copyCode = () => {
@@ -376,7 +385,7 @@ export default function ProfileClient({ user }: ProfileClientProps) {
                     <div className="space-y-4">
                         <div className="flex flex-col items-center">
                             <img
-                                src={inviteImageUrl || user.inviteImageUrl}
+                                src={formatImageUrl(inviteImageUrl || user.inviteImageUrl)}
                                 alt="Daily Grind Season 3 Invitation"
                                 className="max-w-full rounded-lg shadow-lg mb-4"
                                 style={{ maxHeight: '400px' }}
@@ -384,7 +393,7 @@ export default function ProfileClient({ user }: ProfileClientProps) {
                             <p className="text-gray-600 mb-4">Share this image on social media with the hashtag <span className="font-bold">#DailyGrindS3</span></p>
                             <div className="flex flex-wrap gap-4 justify-center">
                                 <a
-                                    href={inviteImageUrl || user.inviteImageUrl}
+                                    href={formatImageUrl(inviteImageUrl || user.inviteImageUrl)}
                                     download="daily-grind-invitation.png"
                                     className="bg-[#7bb5d3] text-white py-2 px-6 rounded-full hover:bg-[#5a9cbf] transition-all transform hover:scale-105 shadow-md flex items-center"
                                 >

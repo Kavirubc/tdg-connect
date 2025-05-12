@@ -94,6 +94,8 @@ export async function generateInviteImage(userName: string): Promise<{ filePath:
     const buffer = canvas.toBuffer('image/png');
     fs.writeFileSync(filePath, buffer);
 
+    console.log(`Generated image saved to ${filePath} with public URL ${publicPath}`);
+
     return { filePath, publicUrl: publicPath };
 }
 
@@ -114,8 +116,13 @@ export async function generateUserInvite(name: string, code?: string): Promise<{
         // Generate a code if not provided
         const inviteCode = code || Math.floor(1000 + Math.random() * 9000).toString();
 
+        // Make sure publicUrl has the correct format with /invites/ prefix
+        const correctedUrl = publicUrl.startsWith('/invites/') ? publicUrl : `/invites${publicUrl}`;
+
+        console.log(`Successfully generated invitation image: ${correctedUrl}`);
+
         return {
-            publicUrl,
+            publicUrl: correctedUrl,
             code: inviteCode
         };
     } catch (error) {
