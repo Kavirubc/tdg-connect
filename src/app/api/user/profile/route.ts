@@ -34,6 +34,9 @@ export async function PATCH(req: NextRequest) {
                 name: updatedUser.name,
                 email: updatedUser.email,
                 code: updatedUser.code,
+                nic: updatedUser.nic,
+                organization: updatedUser.organization,
+                inviteImageUrl: updatedUser.inviteImageUrl,
                 interests: updatedUser.interests,
                 facts: updatedUser.facts,
                 connections: updatedUser.connections

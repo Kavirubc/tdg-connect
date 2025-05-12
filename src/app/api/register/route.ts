@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongodb';
 import User from '@/models/User';
 import bcrypt from 'bcryptjs';
+import { sendInviteEmail } from '@/lib/email-utils';
 
 // Function to generate a unique 4-digit code
 async function generateUniqueCode(): Promise<string> {
@@ -21,10 +22,10 @@ export async function POST(request: Request) {
     try {
         await connectToDatabase();
 
-        const { name, email, password, phone, interests, facts } = await request.json();
+        const { name, email, password, phone, nic, organization, interests, facts } = await request.json();
 
         // Basic validation
-        if (!name || !email || !password || !phone) {
+        if (!name || !email || !password || !phone || !nic || !organization) {
             return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
         }
 
@@ -47,12 +48,28 @@ export async function POST(request: Request) {
             password: hashedPassword,
             code: uniqueCode,
             phone,
+            nic,
+            organization,
             interests: interests || [],
             facts: facts || [],
             connections: []
         });
 
         await newUser.save();
+
+        // Send invite email with the PNG image
+        let imageUrl = '';
+        try {
+            imageUrl = await sendInviteEmail(email, name, uniqueCode);
+        } catch (emailError) {
+            console.error('Error sending invitation email:', emailError);
+            // Continue with the response even if email fails
+        }
+
+        // Update user with image URL if available
+        if (imageUrl) {
+            await User.findByIdAndUpdate(newUser._id, { inviteImageUrl: imageUrl });
+        }
 
         return NextResponse.json({ message: 'User registered successfully' }, { status: 201 });
 

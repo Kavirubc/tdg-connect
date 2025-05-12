@@ -6,6 +6,8 @@ TDG Connect is a social networking web application built with Next.js, designed 
 
 - **User Authentication:** Secure registration and login using email and password.
 - **Unique User Codes:** Each user receives a unique code to facilitate easy and private connections.
+- **NIC and Organization Fields:** Capture user's National Identity Card and organization information during registration.
+- **Social Media Sharing:** Users receive a custom "Daily Grind Season 3 - I'll be there" image via email for social media sharing.
 - **Connections Management:** Users can add, view, and disconnect from connections. Only active connections are shown in the main interface.
 - **AI-Powered Conversation Starters:** The app integrates with OpenAI to generate personalized conversation starters based on user interests and shared topics.
 - **Contact Sharing:** Users can share their email with connections securely.
@@ -23,7 +25,27 @@ TDG Connect is a social networking web application built with Next.js, designed 
 
 ## Getting Started
 
-First, run the development server:
+First, set up your environment variables:
+
+1. Create a `.env.local` file in the root directory with the following variables:
+
+```
+# MongoDB connection string
+MONGODB_URI=your_mongodb_connection_string
+
+# NextAuth.js secret
+NEXTAUTH_SECRET=your_nextauth_secret
+NEXTAUTH_URL=http://localhost:3000
+
+# Email configuration (for sending registration confirmation with shareable image)
+EMAIL_USER=your_email@gmail.com
+EMAIL_APP_PASSWORD=your_app_password
+
+# OpenAI API key (for conversation starters)
+OPENAI_API_KEY=your_openai_api_key
+```
+
+2. Run the development server:
 
 ```bash
 npm run dev
