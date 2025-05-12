@@ -10,6 +10,8 @@ export default function RegisterPage() {
     email: '',
     password: '',
     phone: '', // Add phone field
+    nic: '', // Added NIC field
+    organization: '', // Added Organization field
     interests: '',
     facts: '',
   });
@@ -49,6 +51,8 @@ export default function RegisterPage() {
           ...formData,
           interests: interestTags.length > 0 ? interestTags : formData.interests.split(' '),
           facts: formData.facts.split(','),
+          nic: formData.nic,
+          organization: formData.organization,
         }),
       });
       const data = await response.json();
@@ -160,6 +164,38 @@ export default function RegisterPage() {
               name="phone"
               placeholder="Enter your phone number"
               value={formData.phone}
+              onChange={handleChange}
+              className="w-full p-3 border border-[#e6d7c4] rounded-lg focus:ring-2 focus:ring-[#7bb5d3] focus:border-[#7bb5d3] text-[#333333] placeholder:text-[#aaaaaa]"
+              required
+            />
+          </div>
+
+          <div>
+            <label htmlFor="nic" className="block text-sm font-medium text-[#555555] mb-1">
+              NIC (National Identity Card)
+            </label>
+            <input
+              id="nic"
+              type="text"
+              name="nic"
+              placeholder="Enter your NIC number"
+              value={formData.nic}
+              onChange={handleChange}
+              className="w-full p-3 border border-[#e6d7c4] rounded-lg focus:ring-2 focus:ring-[#7bb5d3] focus:border-[#7bb5d3] text-[#333333] placeholder:text-[#aaaaaa]"
+              required
+            />
+          </div>
+
+          <div>
+            <label htmlFor="organization" className="block text-sm font-medium text-[#555555] mb-1">
+              Organization
+            </label>
+            <input
+              id="organization"
+              type="text"
+              name="organization"
+              placeholder="Enter your organization"
+              value={formData.organization}
               onChange={handleChange}
               className="w-full p-3 border border-[#e6d7c4] rounded-lg focus:ring-2 focus:ring-[#7bb5d3] focus:border-[#7bb5d3] text-[#333333] placeholder:text-[#aaaaaa]"
               required

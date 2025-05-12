@@ -12,6 +12,9 @@ interface ProfileClientProps {
         interests: string[];
         facts?: string[];
         connections?: any[];
+        inviteImageUrl?: string;
+        nic?: string;
+        organization?: string;
     };
 }
 
@@ -23,6 +26,8 @@ export default function ProfileClient({ user }: ProfileClientProps) {
     const [newInterest, setNewInterest] = useState('');
     const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'success' | 'error'>("idle");
     const [saveError, setSaveError] = useState<string | null>(null);
+    const [regeneratingInvite, setRegeneratingInvite] = useState(false);
+    const [inviteImageUrl, setInviteImageUrl] = useState(user.inviteImageUrl || '');
 
     const handleAddInterest = () => {
         if (newInterest.trim() && !interests.includes(newInterest.trim())) {
@@ -58,6 +63,28 @@ export default function ProfileClient({ user }: ProfileClientProps) {
         } catch (err) {
             setSaveStatus('error');
             setSaveError(err instanceof Error ? err.message : 'An error occurred');
+        }
+    };
+
+    const handleRegenerateInvite = async () => {
+        setRegeneratingInvite(true);
+        try {
+            const response = await fetch('/api/user/regenerate-invite', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            });
+
+            if (!response.ok) {
+                const data = await response.json();
+                throw new Error(data.error || 'Failed to regenerate invitation image');
+            }
+
+            const data = await response.json();
+            setInviteImageUrl(data.inviteImageUrl);
+            setRegeneratingInvite(false);
+        } catch (err) {
+            console.error('Error regenerating invitation:', err);
+            setRegeneratingInvite(false);
         }
     };
 
@@ -245,6 +272,57 @@ export default function ProfileClient({ user }: ProfileClientProps) {
             )}
             {saveStatus === 'error' && saveError && (
                 <div className="mt-2 text-red-600 text-sm">{saveError}</div>
+            )}
+
+            {/* Daily Grind Invitation Card */}
+            {(user.inviteImageUrl || inviteImageUrl) && (
+                <div className="community-card p-6 border border-gray-100">
+                    <div className="flex items-center mb-6">
+                        <div className="bg-[#f0e6f9] p-3 rounded-full mr-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-[#9c7bd1]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <div className="text-sm font-medium text-gray-500 uppercase tracking-wide">Daily Grind Season 3</div>
+                            <div className="text-2xl font-bold text-[#333333]">Your Invitation</div>
+                        </div>
+                    </div>
+
+                    <div className="space-y-4">
+                        <div className="flex flex-col items-center">
+                            <img
+                                src={inviteImageUrl || user.inviteImageUrl}
+                                alt="Daily Grind Season 3 Invitation"
+                                className="max-w-full rounded-lg shadow-lg mb-4"
+                                style={{ maxHeight: '400px' }}
+                            />
+                            <p className="text-gray-600 mb-4">Share this image on social media with the hashtag <span className="font-bold">#DailyGrindS3</span></p>
+                            <div className="flex flex-wrap gap-4 justify-center">
+                                <a
+                                    href={inviteImageUrl || user.inviteImageUrl}
+                                    download="daily-grind-invitation.png"
+                                    className="bg-[#7bb5d3] text-white py-2 px-6 rounded-full hover:bg-[#5a9cbf] transition-all transform hover:scale-105 shadow-md flex items-center"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                    </svg>
+                                    Download Image
+                                </a>
+                                <button
+                                    onClick={handleRegenerateInvite}
+                                    disabled={regeneratingInvite}
+                                    className="border border-[#7bb5d3] text-[#7bb5d3] py-2 px-6 rounded-full hover:bg-[#e6f2ff] transition-all flex items-center"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                    </svg>
+                                    {regeneratingInvite ? 'Regenerating...' : 'Regenerate Image'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             )}
         </div>
     );
