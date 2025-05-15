@@ -15,6 +15,7 @@ const UserSchema = new Schema({
         user: { type: Schema.Types.ObjectId, ref: 'User' },
         isDisconnected: { type: Boolean, default: false }
     }],
+    seeYouSoon: [{ type: String }], // user IDs marked as "see you soon"
 }, { timestamps: true });
 
 export default models.User || model('User', UserSchema);

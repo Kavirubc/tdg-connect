@@ -53,8 +53,8 @@ export default function RegisterPage() {
                 <input type="tel" name="phone" placeholder="Phone Number" value={formData.phone} onChange={handleChange} className="w-full p-2 border rounded" required />
                 <input type="text" name="nic" placeholder="National Identity Card (NIC)" value={formData.nic} onChange={handleChange} className="w-full p-2 border rounded" required />
                 <input type="text" name="organization" placeholder="Organization" value={formData.organization} onChange={handleChange} className="w-full p-2 border rounded" required />
-                <textarea name="interests" placeholder="Interests (comma-separated)" value={formData.interests} onChange={handleChange} className="w-full p-2 border rounded" />
-                <textarea name="facts" placeholder="Facts about yourself (comma-separated)" value={formData.facts} onChange={handleChange} className="w-full p-2 border rounded" />
+                <textarea name="interests" placeholder="Interests (comma-separated)" value={formData.interests} onChange={handleChange} className="w-full p-2 border rounded" required />
+                <textarea name="facts" placeholder="Facts about yourself (comma-separated)" value={formData.facts} onChange={handleChange} className="w-full p-2 border rounded" required />
                 <button type="submit" className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600">
                     Register
                 </button>
