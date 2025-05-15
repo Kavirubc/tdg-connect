@@ -5,6 +5,7 @@ import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Swal from 'sweetalert2';
+import { trackLogin } from '@/lib/posthog';
 
 export default function LoginPage() {
   const [formData, setFormData] = useState({ email: '', password: '' });
@@ -36,6 +37,10 @@ export default function LoginPage() {
         confirmButtonColor: '#7bb5d3'
       });
     } else {
+      // Track successful login
+      // Note: we don't have the user ID here but it will be associated with the session later
+      trackLogin('anonymous-id', formData.email);
+
       Swal.fire({
         title: 'Success!',
         text: 'You have been logged in successfully.',

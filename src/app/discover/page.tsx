@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { formatAvatarUrl, getAvatarApiFallbackUrl } from "@/lib/avatar-utils";
+import { trackDiscoverView, trackSeeYouSoon } from "@/lib/posthog";
 
 // Add a type for User
 interface DiscoverUser {
@@ -28,6 +29,9 @@ export default function DiscoverPage() {
 
     useEffect(() => {
         setLoading(true);
+        // Track discover page view
+        trackDiscoverView();
+
         fetch("/api/discover")
             .then((res) => res.json())
             .then((data) => {
@@ -48,6 +52,8 @@ export default function DiscoverPage() {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ userId }),
         });
+        // Track "See You Soon" action
+        trackSeeYouSoon(currentUserId || 'anonymous');
         setSeeYouSoon((prev) => ({ ...prev, [userId]: true }));
     };
 

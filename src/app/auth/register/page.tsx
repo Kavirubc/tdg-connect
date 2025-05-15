@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { trackRegistration } from '@/lib/posthog';
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState({
@@ -61,6 +62,9 @@ export default function RegisterPage() {
       // Show success message with information about invitation
       setSuccess(true);
       setLoading(false);
+
+      // Track registration event with PostHog
+      trackRegistration(data.user?._id || 'anonymous-id', formData.email);
 
       // Add a notification about the invitation
       if (data.inviteImageUrl) {

@@ -6,6 +6,7 @@ import { Session } from "next-auth";
 import Swal from 'sweetalert2';
 import InvitationView from '@/components/InvitationView';
 import { formatAvatarUrl, getAvatarApiFallbackUrl } from '@/lib/avatar-utils';
+import usePageViewTracking from '@/lib/tracking-hooks';
 
 interface Connection {
     _id: string;
@@ -67,6 +68,9 @@ export default function DashboardClient({ session, userData }: { session: Sessio
     };
 
     useEffect(() => {
+        // Track page view
+        usePageViewTracking();
+
         async function fetchConnections() {
             try {
                 const response = await fetch('/api/user/connections');
