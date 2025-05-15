@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Session } from "next-auth";
 import { useRouter, usePathname } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
+import useTrackClick from '@/lib/useTrackClick';
 
 interface NavigationProps {
     session: Session | null;
@@ -36,6 +37,8 @@ export default function Navigation({ session: serverSession }: NavigationProps) 
         router.push('/');
     };
 
+    const trackClick = useTrackClick();
+
     const navLinks = [
         { name: "Home", href: "/" },
         { name: "Dashboard", href: "/dashboard" },
@@ -52,7 +55,7 @@ export default function Navigation({ session: serverSession }: NavigationProps) 
     return (
         <nav className="w-full">
             <div className="container mx-auto max-w-6xl flex justify-between items-center">
-                <Link href="/" className="text-xl font-bold flex items-center">
+                <Link href="/" className="text-xl font-bold flex items-center" onClick={trackClick}>
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
                         className="h-6 w-6 mr-2"
@@ -78,6 +81,7 @@ export default function Navigation({ session: serverSession }: NavigationProps) 
                             href={link.href}
                             className={`text-white hover:text-gray-200 transition-colors ${pathname === link.href ? 'font-semibold border-b-2 border-white pb-1' : ''
                                 }`}
+                            onClick={trackClick}
                         >
                             {link.name}
                         </Link>
@@ -92,8 +96,9 @@ export default function Navigation({ session: serverSession }: NavigationProps) 
                                 Welcome, {session.user?.name || "User"}
                             </span>
                             <button
-                                onClick={handleSignOut}
+                                onClick={e => { trackClick(e); handleSignOut(e); }}
                                 className="community-btn bg-[#d1b89c] hover:bg-[#b29777] text-white px-3 py-1.5 rounded-full text-sm transition-colors"
+                                aria-label="Logout"
                             >
                                 Logout
                             </button>
@@ -152,7 +157,7 @@ export default function Navigation({ session: serverSession }: NavigationProps) 
                             href={link.href}
                             className={`text-white hover:text-gray-200 transition-colors text-lg ${pathname === link.href ? 'font-semibold' : ''
                                 }`}
-                            onClick={() => setIsMenuOpen(false)}
+                            onClick={(e) => { trackClick(e); setIsMenuOpen(false); }}
                         >
                             {link.name}
                         </Link>

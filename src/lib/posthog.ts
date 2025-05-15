@@ -58,4 +58,18 @@ export const trackPageView = (url: string, props = {}) => {
     posthog.capture(EVENTS.PAGE_VIEW, { url, ...props });
 };
 
+// Generic UI event tracking
+type UiEventProps = {
+    event: string;
+    element?: string;
+    label?: string;
+    page?: string;
+    userId?: string;
+    [key: string]: any;
+};
+
+export const trackUiEvent = (props: UiEventProps) => {
+    posthog.capture(props.event, props);
+};
+
 export { posthog, PostHogProvider };

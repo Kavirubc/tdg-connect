@@ -6,6 +6,7 @@ import Swal from 'sweetalert2';
 import InvitationView from '@/components/InvitationView';
 import { formatAvatarUrl, getAvatarApiFallbackUrl } from '@/lib/avatar-utils';
 import { trackAvatarGenerated } from '@/lib/posthog';
+import useTrackClick from '@/lib/useTrackClick';
 
 interface ProfileClientProps {
     user: {
@@ -38,6 +39,8 @@ export default function ProfileClient({ user }: ProfileClientProps) {
     const [avatarError, setAvatarError] = useState<string | null>(null);
     const [avatarUrl, setAvatarUrl] = useState(user.avatarUrl || '');
     const [avatarPromptAttempts, setAvatarPromptAttempts] = useState(user.avatarPromptAttempts || 0);
+
+    const trackClick = useTrackClick();
 
     // Always keep avatarUrl in sync with user.avatarUrl on mount or user change
     useEffect(() => {
@@ -151,6 +154,7 @@ export default function ProfileClient({ user }: ProfileClientProps) {
     };
 
     const copyCode = () => {
+        trackClick({} as any); // Track copy code click
         if (user.code) {
             navigator.clipboard.writeText(user.code);
             Swal.fire({
@@ -324,16 +328,18 @@ export default function ProfileClient({ user }: ProfileClientProps) {
                         <div className="flex justify-end">
                             {isEditing ? (
                                 <button
-                                    onClick={handleSave}
+                                    onClick={e => { trackClick(e); handleSave(); }}
                                     className="bg-[#7bb5d3] text-white py-2 px-6 rounded-full hover:bg-[#5a9cbf] transition-all transform hover:scale-105 shadow-md"
                                     disabled={saveStatus === 'saving'}
+                                    aria-label="Save Changes"
                                 >
                                     {saveStatus === 'saving' ? 'Saving...' : 'Save Changes'}
                                 </button>
                             ) : (
                                 <button
-                                    onClick={() => setIsEditing(true)}
+                                    onClick={e => { trackClick(e); setIsEditing(true); }}
                                     className="border border-[#7bb5d3] text-[#7bb5d3] py-2 px-6 rounded-full hover:bg-[#e6f2ff] transition-all"
+                                    aria-label="Edit Profile"
                                 >
                                     Edit Profile
                                 </button>
@@ -385,6 +391,7 @@ export default function ProfileClient({ user }: ProfileClientProps) {
                                 className="flex gap-2"
                                 onSubmit={e => {
                                     e.preventDefault();
+                                    trackClick(); // No event for form submit
                                     if (
                                         newInterest.trim() &&
                                         !interests.includes(newInterest.trim())
@@ -408,6 +415,7 @@ export default function ProfileClient({ user }: ProfileClientProps) {
                                         !newInterest.trim() ||
                                         interests.includes(newInterest.trim())
                                     }
+                                    aria-label="Add Interest"
                                 >
                                     Add
                                 </button>

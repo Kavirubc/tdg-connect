@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Swal from 'sweetalert2';
 import { trackConnectionCreated } from '@/lib/posthog';
+import useTrackClick from '@/lib/useTrackClick';
 
 interface Connection {
   _id: string;
@@ -34,6 +35,8 @@ export default function ConnectionClient({ userCode }: ConnectionClientProps) {
   const [generatingFor, setGeneratingFor] = useState<string | null>(null);
   const [sharedEmails, setSharedEmails] = useState<Record<string, boolean>>({});
   const [copied, setCopied] = useState(false);
+
+  const trackClick = useTrackClick();
 
   useEffect(() => {
     fetchConnections();
@@ -248,6 +251,7 @@ export default function ConnectionClient({ userCode }: ConnectionClientProps) {
   };
 
   const copyCode = async () => {
+    trackClick();
     await navigator.clipboard.writeText(userCode);
     Swal.fire({
       toast: true,
@@ -312,6 +316,7 @@ export default function ConnectionClient({ userCode }: ConnectionClientProps) {
           <button
             className="mt-2 w-full py-2 border border-[#7bb5d3] text-[#7bb5d3] rounded-md text-sm hover:bg-[#e6f2ff] transition-colors"
             onClick={copyCode}
+            aria-label="Copy Code"
           >
             Copy Code
           </button>
@@ -339,7 +344,7 @@ export default function ConnectionClient({ userCode }: ConnectionClientProps) {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={e => { e.preventDefault(); trackClick(); handleSubmit(e); }} className="space-y-4">
             <div>
               <input
                 id="connectionCode"
@@ -358,6 +363,7 @@ export default function ConnectionClient({ userCode }: ConnectionClientProps) {
               type="submit"
               disabled={isSubmitting}
               className={`w-full py-3 px-6 rounded-full bg-[#7bb5d3] text-white hover:bg-[#5a9cbf] transition-all transform hover:scale-105 shadow-md font-medium ${isSubmitting ? 'opacity-75 cursor-not-allowed' : ''}`}
+              aria-label="Connect"
             >
               {isSubmitting ? 'Connecting...' : 'Connect'}
             </button>
@@ -431,7 +437,8 @@ export default function ConnectionClient({ userCode }: ConnectionClientProps) {
                 <div className="mt-4 space-y-2">
                   <button
                     className="w-full text-center py-2 px-4 border border-[#7bb5d3] text-[#7bb5d3] rounded-md text-sm hover:bg-[#e6f2ff] transition-colors"
-                    onClick={() => generateConversationStarter(connection._id)}
+                    onClick={e => { trackClick(e); generateConversationStarter(connection._id); }}
+                    aria-label="Start Conversation"
                     disabled={generatingFor === connection._id}
                   >
                     {generatingFor === connection._id
@@ -442,7 +449,8 @@ export default function ConnectionClient({ userCode }: ConnectionClientProps) {
                   {!sharedEmails[connection._id] && (
                     <button
                       className="w-full text-center py-2 px-4 border border-[#d1b89c] text-[#d1b89c] rounded-md text-sm hover:bg-[#f9f0e6] transition-colors"
-                      onClick={() => shareEmail(connection._id)}
+                      onClick={e => { trackClick(e); shareEmail(connection._id); }}
+                      aria-label="Share Email"
                     >
                       Share Email
                     </button>
@@ -450,7 +458,8 @@ export default function ConnectionClient({ userCode }: ConnectionClientProps) {
 
                   <button
                     className="w-full text-center py-2 px-4 border border-red-200 text-red-500 rounded-md text-sm hover:bg-red-50 transition-colors"
-                    onClick={() => disconnectUser(connection._id)}
+                    onClick={e => { trackClick(e); disconnectUser(connection._id); }}
+                    aria-label="Disconnect"
                   >
                     Disconnect
                   </button>

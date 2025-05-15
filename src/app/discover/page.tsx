@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { formatAvatarUrl, getAvatarApiFallbackUrl } from "@/lib/avatar-utils";
 import { trackDiscoverView, trackSeeYouSoon } from "@/lib/posthog";
+import useTrackClick from '@/lib/useTrackClick';
 
 // Add a type for User
 interface DiscoverUser {
@@ -26,6 +27,7 @@ export default function DiscoverPage() {
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState("");
     const router = useRouter();
+    const trackClick = useTrackClick();
 
     useEffect(() => {
         setLoading(true);
@@ -68,7 +70,8 @@ export default function DiscoverPage() {
             <div className="max-w-lg mx-auto mt-8 p-6 bg-white rounded-lg shadow-md">
                 <button
                     className="mb-4 text-[#7bb5d3] hover:text-[#5a9cbf] flex items-center font-medium"
-                    onClick={() => setSelectedUser(null)}
+                    onClick={trackClick}
+                    aria-label="Back to Discover"
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
                         <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
@@ -141,8 +144,9 @@ export default function DiscoverPage() {
                 {selectedUser._id !== currentUserId ? (
                     <button
                         className="w-full py-3 px-4 bg-[#7bb5d3] hover:bg-[#5a9cbf] text-white rounded-lg font-medium flex items-center justify-center transition-colors"
-                        onClick={() => handleSeeYouSoon(selectedUser._id)}
+                        onClick={e => { trackClick(e); handleSeeYouSoon(selectedUser._id); }}
                         disabled={seeYouSoon[selectedUser._id]}
+                        aria-label="See You There"
                     >
                         {seeYouSoon[selectedUser._id] ? (
                             <>
@@ -196,7 +200,8 @@ export default function DiscoverPage() {
                         <div
                             key={user._id}
                             className="p-4 bg-white rounded-lg shadow hover:shadow-lg cursor-pointer transition-shadow"
-                            onClick={() => setSelectedUser(user)}
+                            onClick={e => { trackClick(e); setSelectedUser(user); }}
+                            aria-label={`User Card: ${user.name}`}
                         >
                             <div className="flex items-center mb-3">
                                 {user.avatarUrl ? (
@@ -268,8 +273,9 @@ export default function DiscoverPage() {
                     <p className="text-gray-500">Try different search terms or clear the search.</p>
                     {searchQuery && (
                         <button
-                            onClick={() => setSearchQuery("")}
+                            onClick={trackClick}
                             className="mt-4 text-[#7bb5d3] hover:text-[#5a9cbf] font-medium"
+                            aria-label="Clear Search"
                         >
                             Clear Search
                         </button>
