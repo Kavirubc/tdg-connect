@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import useTrackClick from '@/lib/useTrackClick';
 
 interface Connection {
     _id: string;
@@ -33,6 +34,8 @@ export default function AdminDashboardClient() {
         totalConnections: 0,
         activeConnections: 0,
     });
+
+    const trackClick = useTrackClick();
 
     useEffect(() => {
         async function fetchAllUsers() {

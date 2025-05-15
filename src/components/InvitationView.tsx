@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Swal from 'sweetalert2';
+import useTrackClick from '@/lib/useTrackClick';
 
 interface InvitationViewProps {
     user: {
@@ -16,6 +17,7 @@ interface InvitationViewProps {
 export default function InvitationView({ user, compact = false }: InvitationViewProps) {
     const [regeneratingInvite, setRegeneratingInvite] = useState(false);
     const [inviteImageUrl, setInviteImageUrl] = useState(user.inviteImageUrl || '');
+    const trackClick = useTrackClick();
 
     const handleRegenerateInvite = async () => {
         setRegeneratingInvite(true);
@@ -109,9 +111,10 @@ export default function InvitationView({ user, compact = false }: InvitationView
                 </div>
                 <p className="text-gray-600 mb-4">Generate a shareable image for social media to show you'll be attending Daily Grind Season 3!</p>
                 <button
-                    onClick={handleRegenerateInvite}
+                    onClick={e => { trackClick(e); handleRegenerateInvite(); }}
                     disabled={regeneratingInvite}
                     className="bg-[#7bb5d3] text-white py-2 px-6 rounded-lg hover:bg-[#5a9cbf] transition-all flex items-center mx-auto"
+                    aria-label="Generate Invitation Image"
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -197,21 +200,10 @@ export default function InvitationView({ user, compact = false }: InvitationView
                     <div className="flex flex-wrap gap-4 justify-center">
                         <a
                             href={formatImageUrl(inviteImageUrl || user.inviteImageUrl)}
-                            onClick={(e) => {
-                                // If the user clicks download and we know the public URL might not work,
-                                // try to use the API URL instead
-                                const storedApiUrl = localStorage.getItem('lastInviteApiUrl');
-                                const storedPublicUrl = localStorage.getItem('lastInvitePublicUrl');
-                                const currentUrl = formatImageUrl(inviteImageUrl || user.inviteImageUrl);
-
-                                // If we have a stored API URL and the current URL matches the stored public URL
-                                if (storedApiUrl && storedPublicUrl === currentUrl) {
-                                    // Update the href to use the API URL
-                                    (e.currentTarget as HTMLAnchorElement).href = storedApiUrl;
-                                }
-                            }}
+                            onClick={trackClick}
                             download="daily-grind-invitation.png"
                             className="bg-[#7bb5d3] text-white py-2 px-6 rounded-full hover:bg-[#5a9cbf] transition-all transform hover:scale-105 shadow-md flex items-center"
+                            aria-label="Download Invitation Image"
                         >
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -219,7 +211,7 @@ export default function InvitationView({ user, compact = false }: InvitationView
                             Download Image
                         </a>
                         <button
-                            onClick={handleRegenerateInvite}
+                            onClick={e => { trackClick(e); handleRegenerateInvite(); }}
                             disabled={regeneratingInvite}
                             className="border border-[#7bb5d3] text-[#7bb5d3] py-2 px-6 rounded-full hover:bg-[#e6f2ff] transition-all flex items-center"
                         >

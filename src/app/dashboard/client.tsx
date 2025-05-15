@@ -7,6 +7,7 @@ import Swal from 'sweetalert2';
 import InvitationView from '@/components/InvitationView';
 import { formatAvatarUrl, getAvatarApiFallbackUrl } from '@/lib/avatar-utils';
 import usePageViewTracking from '@/lib/tracking-hooks';
+import useTrackClick from '@/lib/useTrackClick';
 
 interface Connection {
     _id: string;
@@ -51,6 +52,8 @@ export default function DashboardClient({ session, userData }: { session: Sessio
     const [seeYouSoonIWantUsers, setSeeYouSoonIWantUsers] = useState<any[]>([]);
     const [seeYouSoonIWantCount, setSeeYouSoonIWantCount] = useState(0);
     const [seeYouSoonIWantLoading, setSeeYouSoonIWantLoading] = useState(true);
+
+    const trackClick = useTrackClick();
 
     // Calculate ranking based on total connections
     const calculateRanking = (connectionCount: number): RankingInfo => {
@@ -231,19 +234,22 @@ export default function DashboardClient({ session, userData }: { session: Sessio
             <div className="flex gap-4 border-b border-gray-200 mb-6">
                 <button
                     className={`py-2 px-4 font-semibold ${activeTab === 'overview' ? 'border-b-4 border-[#7bb5d3] text-[#7bb5d3]' : 'text-gray-500'}`}
-                    onClick={() => setActiveTab('overview')}
+                    onClick={e => { trackClick(e); setActiveTab('overview'); }}
+                    aria-label="Tab: Overview"
                 >
                     Overview
                 </button>
                 <button
                     className={`py-2 px-4 font-semibold ${activeTab === 'seeYouThere' ? 'border-b-4 border-[#7bb5d3] text-[#7bb5d3]' : 'text-gray-500'}`}
-                    onClick={() => setActiveTab('seeYouThere')}
+                    onClick={e => { trackClick(e); setActiveTab('seeYouThere'); }}
+                    aria-label="Tab: See You There"
                 >
                     See You There {seeYouSoonCount > 0 ? `(${seeYouSoonCount})` : ''}
                 </button>
                 <button
                     className={`py-2 px-4 font-semibold ${activeTab === 'seeYouThereIWant' ? 'border-b-4 border-[#7bb5d3] text-[#7bb5d3]' : 'text-gray-500'}`}
-                    onClick={() => setActiveTab('seeYouThereIWant')}
+                    onClick={e => { trackClick(e); setActiveTab('seeYouThereIWant'); }}
+                    aria-label="Tab: People I Want to Meet"
                 >
                     People I Want to Meet {seeYouSoonIWantCount > 0 ? `(${seeYouSoonIWantCount})` : ''}
                 </button>
