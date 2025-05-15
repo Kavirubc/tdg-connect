@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Swal from 'sweetalert2';
+import { trackConnectionCreated } from '@/lib/posthog';
 
 interface Connection {
   _id: string;
@@ -87,6 +88,9 @@ export default function ConnectionClient({ userCode }: ConnectionClientProps) {
         icon: 'success',
         confirmButtonColor: '#7bb5d3'
       });
+
+      // Track the connection event in PostHog
+      trackConnectionCreated(userCode, data.connection._id);
 
       setConnectionCode('');
       fetchConnections(); // Refresh the connections list

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Swal from 'sweetalert2';
 import InvitationView from '@/components/InvitationView';
 import { formatAvatarUrl, getAvatarApiFallbackUrl } from '@/lib/avatar-utils';
+import { trackAvatarGenerated } from '@/lib/posthog';
 
 interface ProfileClientProps {
     user: {
@@ -124,6 +125,10 @@ export default function ProfileClient({ user }: ProfileClientProps) {
             setAvatarUrl((data.avatarUrl.startsWith('/userAvatar/') ? data.avatarUrl : `/userAvatar/${data.avatarUrl}`) + `?t=${Date.now()}`);
             setAvatarPromptAttempts(data.attempts);
             setAvatarPrompt('');
+
+            // Track avatar generation in PostHog
+            trackAvatarGenerated(user._id);
+
             Swal.fire({
                 title: 'Success!',
                 text: 'Avatar generated successfully!',
