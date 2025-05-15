@@ -28,6 +28,7 @@ export async function POST(req: Request) {
         result = await openai.images.generate({
             model: "gpt-image-1",
             prompt: newPrompt,
+            quality: "low",
         });
     } catch (err: any) {
         // Log the error for debugging

@@ -7,7 +7,9 @@ export async function GET(
     req: NextRequest,
     context: any
 ) {
-    const filename = context.params.filename;
+    // Make sure to await params as it's a Promise in Next.js App Router
+    const params = await context.params;
+    const filename = params.filename;
     if (!filename) {
         return NextResponse.json({ error: 'Filename required' }, { status: 400 });
     }
@@ -16,8 +18,32 @@ export async function GET(
         return NextResponse.json({ error: 'Invalid filename' }, { status: 400 });
     }
     const filePath = path.join(process.cwd(), 'public', 'userAvatar', filename);
+    
+    // Improved error handling when file doesn't exist
     if (!fs.existsSync(filePath)) {
-        return NextResponse.json({ error: 'File not found' }, { status: 404 });
+        console.error(`Avatar file not found: ${filePath}`);
+        
+        // Try to serve default avatar instead
+        const defaultPath = path.join(process.cwd(), 'public', 'userAvatar', 'default.png');
+        
+        if (fs.existsSync(defaultPath)) {
+            // Return default avatar if it exists
+            const defaultBuffer = fs.readFileSync(defaultPath);
+            return new NextResponse(defaultBuffer, {
+                status: 200,
+                headers: {
+                    'Content-Type': 'image/png',
+                    'Cache-Control': 'no-cache, no-store, must-revalidate',
+                }
+            });
+        } else {
+            // If default doesn't exist either, return error JSON
+            return NextResponse.json({ 
+                error: 'Avatar not found', 
+                requestedFile: filename,
+                searchPath: filePath
+            }, { status: 404 });
+        }
     }
     const fileBuffer = fs.readFileSync(filePath);
     const ext = path.extname(filename).toLowerCase();
