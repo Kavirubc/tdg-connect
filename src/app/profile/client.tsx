@@ -5,6 +5,24 @@ import Link from 'next/link';
 import Swal from 'sweetalert2';
 import InvitationView from '@/components/InvitationView';
 
+// Helper to format avatar image URL with /userAvatar/ prefix
+const formatAvatarUrl = (url: string | undefined) => {
+    if (!url) return '';
+    // Remove any query params for fallback logic
+    const [baseUrl, query] = url.split('?');
+    const formattedUrl = baseUrl.startsWith('/userAvatar/') ? url : baseUrl.startsWith('/') ? `/userAvatar${baseUrl}` + (query ? `?${query}` : '') : `/userAvatar/${baseUrl}` + (query ? `?${query}` : '');
+    return formattedUrl;
+};
+
+// Helper to get API fallback URL for avatar
+const getApiFallbackUrl = (url: string | undefined) => {
+    if (!url) return '';
+    // Remove query params
+    const [baseUrl] = url.split('?');
+    const filename = baseUrl.split('/').pop();
+    return `/api/user/avatar/${filename}`;
+};
+
 interface ProfileClientProps {
     user: {
         _id: string;
@@ -197,14 +215,25 @@ export default function ProfileClient({ user }: ProfileClientProps) {
                 <div>
                     {avatarUrl ? (
                         <img
-                            src={avatarUrl.startsWith('/userAvatar/') ? avatarUrl : avatarUrl.startsWith('/') ? avatarUrl : `/userAvatar/${avatarUrl}`}
+                            src={formatAvatarUrl(avatarUrl)}
                             alt="Profile Avatar"
                             className="w-24 h-24 rounded-full object-cover border-2 border-[#7bb5d3]"
                             onError={e => {
-                                // Only set fallback if not already default
-                                if (!e.currentTarget.src.endsWith('/userAvatar/default.png')) {
-                                    e.currentTarget.src = '/userAvatar/default.png';
-                                    e.currentTarget.style.border = '2px solid red';
+                                const currentSrc = (e.currentTarget as HTMLImageElement).src;
+                                // If already using API fallback, show default
+                                if (currentSrc.includes('/api/user/avatar/')) {
+                                    if (!e.currentTarget.src.endsWith('/userAvatar/default.png')) {
+                                        e.currentTarget.src = '/userAvatar/default.png';
+                                        e.currentTarget.style.border = '2px solid red';
+                                    }
+                                    return;
+                                }
+                                // Try API fallback
+                                const fallbackUrl = getApiFallbackUrl(avatarUrl);
+                                if (fallbackUrl) {
+                                    (e.currentTarget as HTMLImageElement).src = fallbackUrl;
+                                } else {
+                                    (e.currentTarget as HTMLImageElement).src = '/userAvatar/default.png';
                                 }
                             }}
                         />
