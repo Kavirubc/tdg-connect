@@ -17,6 +17,8 @@ interface ProfileClientProps {
         inviteImageUrl?: string;
         nic?: string;
         organization?: string;
+        avatarUrl?: string;
+        avatarPromptAttempts?: number;
     };
 }
 
@@ -28,6 +30,12 @@ export default function ProfileClient({ user }: ProfileClientProps) {
     const [newInterest, setNewInterest] = useState('');
     const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'success' | 'error'>("idle");
     const [saveError, setSaveError] = useState<string | null>(null);
+
+    const [avatarPrompt, setAvatarPrompt] = useState('');
+    const [avatarLoading, setAvatarLoading] = useState(false);
+    const [avatarError, setAvatarError] = useState<string | null>(null);
+    const [avatarUrl, setAvatarUrl] = useState(user.avatarUrl || '');
+    const [avatarPromptAttempts, setAvatarPromptAttempts] = useState(user.avatarPromptAttempts || 0);
 
     const handleAddInterest = () => {
         if (newInterest.trim() && !interests.includes(newInterest.trim())) {
@@ -82,6 +90,35 @@ export default function ProfileClient({ user }: ProfileClientProps) {
         }
     };
 
+    const handleGenerateAvatar = async () => {
+        setAvatarLoading(true);
+        setAvatarError(null);
+        try {
+            const res = await fetch('/api/user/generate-avatar', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ prompt: avatarPrompt }),
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || 'Failed to generate avatar');
+            setAvatarUrl(data.avatarUrl);
+            setAvatarPromptAttempts(data.attempts);
+            setAvatarPrompt('');
+            Swal.fire({
+                title: 'Success!',
+                text: 'Avatar generated successfully!',
+                icon: 'success',
+                confirmButtonColor: '#7bb5d3',
+                timer: 2000,
+                showConfirmButton: false
+            });
+        } catch (err) {
+            setAvatarError(err instanceof Error ? err.message : 'Failed to generate avatar');
+        } finally {
+            setAvatarLoading(false);
+        }
+    };
+
     const copyCode = () => {
         if (user.code) {
             navigator.clipboard.writeText(user.code);
@@ -127,6 +164,49 @@ export default function ProfileClient({ user }: ProfileClientProps) {
                             Go to Dashboard
                         </Link>
                     </div>
+                </div>
+            </div>
+
+            {/* Avatar Section */}
+            <div className="community-card p-6 border border-gray-100 flex items-center gap-6">
+                <div>
+                    {avatarUrl ? (
+                        <img src={avatarUrl} alt="Profile Avatar" className="w-24 h-24 rounded-full object-cover border-2 border-[#7bb5d3]" />
+                    ) : (
+                        <div className="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center text-3xl text-gray-400">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                            </svg>
+                        </div>
+                    )}
+                </div>
+                <div className="flex-1">
+                    <div className="mb-2 font-medium text-gray-700">Generate an AI Avatar</div>
+                    <input
+                        type="text"
+                        value={avatarPrompt}
+                        onChange={e => setAvatarPrompt(e.target.value)}
+                        placeholder="Describe yourself for your avatar..."
+                        className="w-full p-2 border rounded mb-2"
+                        disabled={avatarPromptAttempts >= 3 || avatarLoading}
+                    />
+                    <div className="text-xs text-gray-500 mt-1">
+                        For best results, describe yourself with details like appearance, style, hobbies, or vibe. <br />
+                        <span className="italic">Example: "A smiling woman with curly hair, glasses, and a love for hiking and coffee."</span>
+                    </div>
+                    <button
+                        onClick={handleGenerateAvatar}
+                        className="bg-[#7bb5d3] text-white px-4 py-2 rounded hover:bg-[#5a9cbf] disabled:opacity-50"
+                        disabled={!avatarPrompt.trim() || avatarPromptAttempts >= 3 || avatarLoading}
+                    >
+                        {avatarLoading ? 'Generating...' : 'Generate Avatar'}
+                    </button>
+                    <div className="text-xs text-gray-500 mt-1">
+                        {avatarPromptAttempts < 3
+                            ? `You have ${3 - avatarPromptAttempts} avatar generations left.`
+                            : 'You have reached the maximum number of avatar generations.'}
+                    </div>
+                    {avatarError && <div className="text-red-600 text-xs mt-1">{avatarError}</div>}
                 </div>
             </div>
 

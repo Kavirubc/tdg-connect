@@ -140,26 +140,28 @@ export default function InvitationView({ user, compact = false }: InvitationView
             <div className="space-y-4">
                 <div className="flex flex-col items-center">
                     {!compact && (
-                        <div className="bg-gray-100 p-4 mb-4 rounded-lg w-full text-xs">
-                            <p className="font-mono text-gray-700">Debug info:</p>
-                            <p className="font-mono text-gray-700">Original URL: {inviteImageUrl || user.inviteImageUrl}</p>
-                            <p className="font-mono text-gray-700">Formatted URL: {formatImageUrl(inviteImageUrl || user.inviteImageUrl)}</p>
-                            <p className="font-mono text-gray-700">API Fallback URL: {getApiFallbackUrl(inviteImageUrl || user.inviteImageUrl)}</p>
-                            <div className="mt-2">
-                                <button
-                                    onClick={() => window.open(formatImageUrl(inviteImageUrl || user.inviteImageUrl), '_blank')}
-                                    className="bg-blue-500 text-white text-xs px-2 py-1 rounded mr-2"
-                                >
-                                    Test Public URL
-                                </button>
-                                <button
-                                    onClick={() => window.open(getApiFallbackUrl(inviteImageUrl || user.inviteImageUrl), '_blank')}
-                                    className="bg-green-500 text-white text-xs px-2 py-1 rounded"
-                                >
-                                    Test API URL
-                                </button>
-                            </div>
-                        </div>
+                        // Debug info block commented out
+                        // <div className="bg-gray-100 p-4 mb-4 rounded-lg w-full text-xs">
+                        //     <p className="font-mono text-gray-700">Debug info:</p>
+                        //     <p className="font-mono text-gray-700">Original URL: {inviteImageUrl || user.inviteImageUrl}</p>
+                        //     <p className="font-mono text-gray-700">Formatted URL: {formatImageUrl(inviteImageUrl || user.inviteImageUrl)}</p>
+                        //     <p className="font-mono text-gray-700">API Fallback URL: {getApiFallbackUrl(inviteImageUrl || user.inviteImageUrl)}</p>
+                        //     <div className="mt-2">
+                        //         <button
+                        //             onClick={() => window.open(formatImageUrl(inviteImageUrl || user.inviteImageUrl), '_blank')}
+                        //             className="bg-blue-500 text-white text-xs px-2 py-1 rounded mr-2"
+                        //         >
+                        //             Test Public URL
+                        //         </button>
+                        //         <button
+                        //             onClick={() => window.open(getApiFallbackUrl(inviteImageUrl || user.inviteImageUrl), '_blank')}
+                        //             className="bg-green-500 text-white text-xs px-2 py-1 rounded"
+                        //         >
+                        //             Test API URL
+                        //         </button>
+                        //     </div>
+                        // </div>
+                        null
                     )}
 
                     <img

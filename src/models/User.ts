@@ -11,10 +11,13 @@ const UserSchema = new Schema({
     inviteImageUrl: { type: String }, // URL to the invitation image
     interests: { type: [String], default: [] },
     facts: { type: [String], default: [] },
+    avatarUrl: { type: String }, // URL to the generated avatar image
+    avatarPromptAttempts: { type: Number, default: 0 }, // Number of avatar generations
     connections: [{
         user: { type: Schema.Types.ObjectId, ref: 'User' },
         isDisconnected: { type: Boolean, default: false }
     }],
+    seeYouSoon: [{ type: String }], // user IDs marked as "see you soon"
 }, { timestamps: true });
 
 export default models.User || model('User', UserSchema);

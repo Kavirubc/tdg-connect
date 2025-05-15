@@ -236,6 +236,7 @@ export default function RegisterPage() {
               value={formData.interests}
               onChange={handleInterestsChange}
               className="w-full p-3 border border-[#e6d7c4] rounded-lg focus:ring-2 focus:ring-[#7bb5d3] focus:border-[#7bb5d3] text-[#333333] placeholder:text-[#aaaaaa]"
+              required
             />
             <p className="mt-1 text-xs text-[#777777]">Type each interest and press space to separate them</p>
 
@@ -262,6 +263,7 @@ export default function RegisterPage() {
               onChange={handleChange}
               className="w-full p-3 border border-[#e6d7c4] rounded-lg focus:ring-2 focus:ring-[#7bb5d3] focus:border-[#7bb5d3] text-[#333333] placeholder:text-[#aaaaaa]"
               rows={2}
+              required
             />
             <p className="mt-1 text-xs text-[#777777]">Separate with commas</p>
           </div>
