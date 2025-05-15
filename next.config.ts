@@ -20,6 +20,19 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   // Make sure static files are served from public directory
   output: 'standalone',
+  async headers() {
+    return [
+      {
+        source: '/userAvatar/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'no-cache, no-store, must-revalidate',
+          },
+        ],
+      },
+    ];
+  },
 };
 
 export default nextConfig;
