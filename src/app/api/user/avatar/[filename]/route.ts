@@ -18,14 +18,14 @@ export async function GET(
         return NextResponse.json({ error: 'Invalid filename' }, { status: 400 });
     }
     const filePath = path.join(process.cwd(), 'public', 'userAvatar', filename);
-    
+
     // Improved error handling when file doesn't exist
     if (!fs.existsSync(filePath)) {
         console.error(`Avatar file not found: ${filePath}`);
-        
+
         // Try to serve default avatar instead
         const defaultPath = path.join(process.cwd(), 'public', 'userAvatar', 'default.png');
-        
+
         if (fs.existsSync(defaultPath)) {
             // Return default avatar if it exists
             const defaultBuffer = fs.readFileSync(defaultPath);
@@ -38,8 +38,8 @@ export async function GET(
             });
         } else {
             // If default doesn't exist either, return error JSON
-            return NextResponse.json({ 
-                error: 'Avatar not found', 
+            return NextResponse.json({
+                error: 'Avatar not found',
                 requestedFile: filename,
                 searchPath: filePath
             }, { status: 404 });
