@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Session } from "next-auth";
 import Swal from 'sweetalert2';
 import InvitationView from '@/components/InvitationView';
+import { formatAvatarUrl, getAvatarApiFallbackUrl } from '@/lib/avatar-utils';
 
 interface Connection {
     _id: string;
@@ -258,7 +259,26 @@ export default function DashboardClient({ session, userData }: { session: Sessio
                             {seeYouSoonUsers.map((user) => (
                                 <div key={user._id} className="p-4 bg-[#f9f9f9] rounded-lg shadow flex items-center gap-4">
                                     {user.avatarUrl ? (
-                                        <img src={user.avatarUrl} alt={user.name + "'s avatar"} className="w-12 h-12 rounded-full object-cover border border-gray-200" />
+                                        <img
+                                            src={formatAvatarUrl(user.avatarUrl)}
+                                            alt={user.name + "'s avatar"}
+                                            className="w-12 h-12 rounded-full object-cover border border-gray-200"
+                                            onError={(e) => {
+                                                const currentSrc = (e.currentTarget as HTMLImageElement).src;
+                                                // If already using API fallback, show default
+                                                if (currentSrc.includes('/api/user/avatar/')) {
+                                                    e.currentTarget.src = '/userAvatar/default.png';
+                                                    return;
+                                                }
+                                                // Try API fallback
+                                                const fallbackUrl = getAvatarApiFallbackUrl(user.avatarUrl);
+                                                if (fallbackUrl) {
+                                                    (e.currentTarget as HTMLImageElement).src = fallbackUrl;
+                                                } else {
+                                                    e.currentTarget.src = '/userAvatar/default.png';
+                                                }
+                                            }}
+                                        />
                                     ) : (
                                         <div className="w-12 h-12 rounded-full bg-[#e6f2ff] flex items-center justify-center border border-gray-200">
                                             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-[#7bb5d3]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -296,7 +316,26 @@ export default function DashboardClient({ session, userData }: { session: Sessio
                             {seeYouSoonIWantUsers.map((user) => (
                                 <div key={user._id} className="p-4 bg-[#f9f9f9] rounded-lg shadow flex items-center gap-4">
                                     {user.avatarUrl ? (
-                                        <img src={user.avatarUrl} alt={user.name + "'s avatar"} className="w-12 h-12 rounded-full object-cover border border-gray-200" />
+                                        <img
+                                            src={formatAvatarUrl(user.avatarUrl)}
+                                            alt={user.name + "'s avatar"}
+                                            className="w-12 h-12 rounded-full object-cover border border-gray-200"
+                                            onError={(e) => {
+                                                const currentSrc = (e.currentTarget as HTMLImageElement).src;
+                                                // If already using API fallback, show default
+                                                if (currentSrc.includes('/api/user/avatar/')) {
+                                                    e.currentTarget.src = '/userAvatar/default.png';
+                                                    return;
+                                                }
+                                                // Try API fallback
+                                                const fallbackUrl = getAvatarApiFallbackUrl(user.avatarUrl);
+                                                if (fallbackUrl) {
+                                                    (e.currentTarget as HTMLImageElement).src = fallbackUrl;
+                                                } else {
+                                                    e.currentTarget.src = '/userAvatar/default.png';
+                                                }
+                                            }}
+                                        />
                                     ) : (
                                         <div className="w-12 h-12 rounded-full bg-[#e6f2ff] flex items-center justify-center border border-gray-200">
                                             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-[#7bb5d3]" fill="none" viewBox="0 0 24 24" stroke="currentColor">

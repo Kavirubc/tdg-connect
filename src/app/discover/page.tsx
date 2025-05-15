@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
+import { formatAvatarUrl, getAvatarApiFallbackUrl } from "@/lib/avatar-utils";
 
 // Add a type for User
 interface DiscoverUser {
@@ -70,7 +71,26 @@ export default function DiscoverPage() {
                 </button>
                 <div className="text-center">
                     {selectedUser.avatarUrl ? (
-                        <img src={selectedUser.avatarUrl} alt={selectedUser.name + "'s avatar"} className="w-24 h-24 rounded-full object-cover mb-4 mx-auto border-2 border-[#7bb5d3]" />
+                        <img
+                            src={formatAvatarUrl(selectedUser.avatarUrl)}
+                            alt={selectedUser.name + "'s avatar"}
+                            className="w-24 h-24 rounded-full object-cover mb-4 mx-auto border-2 border-[#7bb5d3]"
+                            onError={(e) => {
+                                const currentSrc = (e.currentTarget as HTMLImageElement).src;
+                                // If already using API fallback, show default
+                                if (currentSrc.includes('/api/user/avatar/')) {
+                                    e.currentTarget.src = '/userAvatar/default.png';
+                                    return;
+                                }
+                                // Try API fallback
+                                const fallbackUrl = getAvatarApiFallbackUrl(selectedUser.avatarUrl);
+                                if (fallbackUrl) {
+                                    (e.currentTarget as HTMLImageElement).src = fallbackUrl;
+                                } else {
+                                    e.currentTarget.src = '/userAvatar/default.png';
+                                }
+                            }}
+                        />
                     ) : (
                         <div className="w-24 h-24 rounded-full bg-[#e6f2ff] flex items-center justify-center mb-4 mx-auto border-2 border-[#7bb5d3]">
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-[#7bb5d3]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -174,7 +194,26 @@ export default function DiscoverPage() {
                         >
                             <div className="flex items-center mb-3">
                                 {user.avatarUrl ? (
-                                    <img src={user.avatarUrl} alt={user.name + "'s avatar"} className="w-12 h-12 rounded-full object-cover border border-gray-200" />
+                                    <img
+                                        src={formatAvatarUrl(user.avatarUrl)}
+                                        alt={user.name + "'s avatar"}
+                                        className="w-12 h-12 rounded-full object-cover border border-gray-200"
+                                        onError={(e) => {
+                                            const currentSrc = (e.currentTarget as HTMLImageElement).src;
+                                            // If already using API fallback, show default
+                                            if (currentSrc.includes('/api/user/avatar/')) {
+                                                e.currentTarget.src = '/userAvatar/default.png';
+                                                return;
+                                            }
+                                            // Try API fallback
+                                            const fallbackUrl = getAvatarApiFallbackUrl(user.avatarUrl);
+                                            if (fallbackUrl) {
+                                                (e.currentTarget as HTMLImageElement).src = fallbackUrl;
+                                            } else {
+                                                e.currentTarget.src = '/userAvatar/default.png';
+                                            }
+                                        }}
+                                    />
                                 ) : (
                                     <div className="w-12 h-12 rounded-full bg-[#e6f2ff] flex items-center justify-center border border-gray-200">
                                         <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-[#7bb5d3]" fill="none" viewBox="0 0 24 24" stroke="currentColor">

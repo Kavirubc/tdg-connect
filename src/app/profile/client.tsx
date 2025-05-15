@@ -4,24 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Swal from 'sweetalert2';
 import InvitationView from '@/components/InvitationView';
-
-// Helper to format avatar image URL with /userAvatar/ prefix
-const formatAvatarUrl = (url: string | undefined) => {
-    if (!url) return '';
-    // Remove any query params for fallback logic
-    const [baseUrl, query] = url.split('?');
-    const formattedUrl = baseUrl.startsWith('/userAvatar/') ? url : baseUrl.startsWith('/') ? `/userAvatar${baseUrl}` + (query ? `?${query}` : '') : `/userAvatar/${baseUrl}` + (query ? `?${query}` : '');
-    return formattedUrl;
-};
-
-// Helper to get API fallback URL for avatar
-const getApiFallbackUrl = (url: string | undefined) => {
-    if (!url) return '';
-    // Remove query params
-    const [baseUrl] = url.split('?');
-    const filename = baseUrl.split('/').pop();
-    return `/api/user/avatar/${filename}`;
-};
+import { formatAvatarUrl, getAvatarApiFallbackUrl } from '@/lib/avatar-utils';
 
 interface ProfileClientProps {
     user: {
@@ -229,7 +212,7 @@ export default function ProfileClient({ user }: ProfileClientProps) {
                                     return;
                                 }
                                 // Try API fallback
-                                const fallbackUrl = getApiFallbackUrl(avatarUrl);
+                                const fallbackUrl = getAvatarApiFallbackUrl(avatarUrl);
                                 if (fallbackUrl) {
                                     (e.currentTarget as HTMLImageElement).src = fallbackUrl;
                                 } else {
