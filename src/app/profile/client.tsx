@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Swal from 'sweetalert2';
 import InvitationView from '@/components/InvitationView';
@@ -36,6 +36,12 @@ export default function ProfileClient({ user }: ProfileClientProps) {
     const [avatarError, setAvatarError] = useState<string | null>(null);
     const [avatarUrl, setAvatarUrl] = useState(user.avatarUrl || '');
     const [avatarPromptAttempts, setAvatarPromptAttempts] = useState(user.avatarPromptAttempts || 0);
+
+    // Always keep avatarUrl in sync with user.avatarUrl on mount or user change
+    useEffect(() => {
+        setAvatarUrl(user.avatarUrl || '');
+        setAvatarPromptAttempts(user.avatarPromptAttempts || 0);
+    }, [user.avatarUrl, user.avatarPromptAttempts]);
 
     const handleAddInterest = () => {
         if (newInterest.trim() && !interests.includes(newInterest.trim())) {
@@ -113,7 +119,8 @@ export default function ProfileClient({ user }: ProfileClientProps) {
             });
             const data = await res.json();
             if (!res.ok) throw new Error(data.error || 'Failed to generate avatar');
-            setAvatarUrl(data.avatarUrl);
+            // Force reload by appending a timestamp query param
+            setAvatarUrl((data.avatarUrl.startsWith('/userAvatar/') ? data.avatarUrl : `/userAvatar/${data.avatarUrl}`) + `?t=${Date.now()}`);
             setAvatarPromptAttempts(data.attempts);
             setAvatarPrompt('');
             Swal.fire({
