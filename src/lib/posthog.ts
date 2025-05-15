@@ -7,12 +7,13 @@ import { PostHogProvider } from 'posthog-js/react';
 if (typeof window !== 'undefined') {
     posthog.init(process.env.NEXT_PUBLIC_POSTHOG_KEY || 'your-project-api-key', {
         api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST || 'https://app.posthog.com',
-        // Enable debug mode in development
+        autocapture: true, // Enable automatic click and form submission tracking
+        capture_performance: true, // Enable web vitals tracking
+        capture_pageview: false, // We will capture manually
+        capture_pageleave: true, // Enable pageleave events
         loaded: (posthog) => {
             if (process.env.NODE_ENV === 'development') posthog.debug();
-        },
-        capture_pageview: true, // Enable automatic $pageview events
-        capture_pageleave: true // Enable automatic $pageleave events
+        }
     });
 }
 
