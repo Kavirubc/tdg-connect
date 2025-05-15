@@ -29,6 +29,9 @@ importers:
       next-auth:
         specifier: ^4.24.11
         version: 4.24.11(next@15.3.2(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(nodemailer@7.0.3)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      node-fetch:
+        specifier: ^2.7.0
+        version: 2.7.0
       nodemailer:
         specifier: ^7.0.3
         version: 7.0.3
@@ -54,6 +57,9 @@ importers:
       '@types/node':
         specifier: ^20
         version: 20.17.46
+      '@types/node-fetch':
+        specifier: ^2.6.12
+        version: 2.6.12
       '@types/nodemailer':
         specifier: ^6.4.17
         version: 6.4.17

@@ -10,6 +10,7 @@ export async function GET() {
         organization: 1,
         interests: 1,
         facts: 1,
+        avatarUrl: 1,
         _id: 1
     }).lean();
     return NextResponse.json({ users });

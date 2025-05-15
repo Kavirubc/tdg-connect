@@ -10,6 +10,7 @@ interface DiscoverUser {
     organization: string;
     interests: string[];
     facts: string[];
+    avatarUrl?: string;
 }
 
 export default function DiscoverPage() {
@@ -39,6 +40,15 @@ export default function DiscoverPage() {
                 <button className="mb-4 text-blue-500" onClick={() => setSelectedUser(null)}>
                     ← Back to Discover
                 </button>
+                {selectedUser.avatarUrl ? (
+                    <img src={selectedUser.avatarUrl} alt={selectedUser.name + "'s avatar"} className="w-24 h-24 rounded-full object-cover mb-4 mx-auto" />
+                ) : (
+                    <div className="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center mb-4 mx-auto">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                    </div>
+                )}
                 <h2 className="text-2xl font-bold mb-2">{selectedUser.name}</h2>
                 <p className="mb-1 font-medium">Organization: <span className="font-normal">{selectedUser.organization}</span></p>
                 <div className="mb-2">
@@ -78,6 +88,15 @@ export default function DiscoverPage() {
                         className="p-4 bg-white rounded shadow hover:shadow-lg cursor-pointer"
                         onClick={() => setSelectedUser(user)}
                     >
+                        {user.avatarUrl ? (
+                            <img src={user.avatarUrl} alt={user.name + "'s avatar"} className="w-12 h-12 rounded-full object-cover mb-2" />
+                        ) : (
+                            <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center mb-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                </svg>
+                            </div>
+                        )}
                         <h2 className="text-xl font-semibold">{user.name}</h2>
                         <p className="text-gray-600">{user.organization}</p>
                     </div>

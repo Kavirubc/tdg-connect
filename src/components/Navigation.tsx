@@ -40,6 +40,7 @@ export default function Navigation({ session: serverSession }: NavigationProps) 
         { name: "Home", href: "/" },
         { name: "Dashboard", href: "/dashboard" },
         { name: "Connections", href: "/connections" },
+        { name: "Discover", href: "/discover" },
     ];
 
     // Add conditional links based on auth state

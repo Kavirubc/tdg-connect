@@ -1,6 +1,7 @@
 import { createCanvas } from 'canvas';
 import fs from 'fs';
 import path from 'path';
+import fetch from 'node-fetch';
 
 // Ensure the invites directory exists
 function ensureInvitesDirectory() {
@@ -9,6 +10,27 @@ function ensureInvitesDirectory() {
         console.log('Creating invites directory at:', publicDir);
         fs.mkdirSync(publicDir, { recursive: true });
     }
+}
+
+// Ensure the userAvatar directory exists
+function ensureUserAvatarDirectory() {
+    const publicDir = path.join(process.cwd(), 'public', 'userAvatar');
+    if (!fs.existsSync(publicDir)) {
+        fs.mkdirSync(publicDir, { recursive: true });
+    }
+}
+
+// Save avatar image from URL
+export async function saveAvatarImageFromUrl(imageUrl: string, userId: string): Promise<string> {
+    ensureUserAvatarDirectory();
+    const res = await fetch(imageUrl);
+    if (!res.ok) throw new Error('Failed to fetch avatar image from OpenAI');
+    const buffer = Buffer.from(await res.arrayBuffer());
+    const fileName = `avatar_${userId}_${Date.now()}.png`;
+    const filePath = path.join(process.cwd(), 'public', 'userAvatar', fileName);
+    const publicPath = `/userAvatar/${fileName}`;
+    fs.writeFileSync(filePath, buffer);
+    return publicPath;
 }
 
 // Generate a "Daily Grind Season 3 - I'll be there" PNG image
