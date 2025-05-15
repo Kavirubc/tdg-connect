@@ -91,6 +91,18 @@ export default function ProfileClient({ user }: ProfileClientProps) {
     };
 
     const handleGenerateAvatar = async () => {
+        Swal.fire({
+            title: 'Generating Avatar...',
+            text: 'Your profile image is being generated. Please do not change or close the window.',
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            allowEnterKey: false,
+            didOpen: () => {
+                Swal.showLoading();
+            },
+            showConfirmButton: false,
+            background: '#f8fafc',
+        });
         setAvatarLoading(true);
         setAvatarError(null);
         try {
@@ -114,6 +126,12 @@ export default function ProfileClient({ user }: ProfileClientProps) {
             });
         } catch (err) {
             setAvatarError(err instanceof Error ? err.message : 'Failed to generate avatar');
+            Swal.fire({
+                title: 'Error',
+                text: err instanceof Error ? err.message : 'Failed to generate avatar',
+                icon: 'error',
+                confirmButtonColor: '#7bb5d3'
+            });
         } finally {
             setAvatarLoading(false);
         }
@@ -171,7 +189,15 @@ export default function ProfileClient({ user }: ProfileClientProps) {
             <div className="community-card p-6 border border-gray-100 flex items-center gap-6">
                 <div>
                     {avatarUrl ? (
-                        <img src={avatarUrl} alt="Profile Avatar" className="w-24 h-24 rounded-full object-cover border-2 border-[#7bb5d3]" />
+                        <img
+                            src={avatarUrl.startsWith('/') ? avatarUrl : `/userAvatar/${avatarUrl}`}
+                            alt="Profile Avatar"
+                            className="w-24 h-24 rounded-full object-cover border-2 border-[#7bb5d3]"
+                            onError={e => {
+                                e.currentTarget.src = '/userAvatar/default.png'; // fallback image if you have one
+                                e.currentTarget.style.border = '2px solid red';
+                            }}
+                        />
                     ) : (
                         <div className="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center text-3xl text-gray-400">
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
