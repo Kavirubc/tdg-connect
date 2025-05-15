@@ -190,12 +190,15 @@ export default function ProfileClient({ user }: ProfileClientProps) {
                 <div>
                     {avatarUrl ? (
                         <img
-                            src={avatarUrl.startsWith('/') ? avatarUrl : `/userAvatar/${avatarUrl}`}
+                            src={avatarUrl.startsWith('/userAvatar/') ? avatarUrl : avatarUrl.startsWith('/') ? avatarUrl : `/userAvatar/${avatarUrl}`}
                             alt="Profile Avatar"
                             className="w-24 h-24 rounded-full object-cover border-2 border-[#7bb5d3]"
                             onError={e => {
-                                e.currentTarget.src = '/userAvatar/default.png'; // fallback image if you have one
-                                e.currentTarget.style.border = '2px solid red';
+                                // Only set fallback if not already default
+                                if (!e.currentTarget.src.endsWith('/userAvatar/default.png')) {
+                                    e.currentTarget.src = '/userAvatar/default.png';
+                                    e.currentTarget.style.border = '2px solid red';
+                                }
                             }}
                         />
                     ) : (
