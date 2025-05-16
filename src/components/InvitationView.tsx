@@ -174,25 +174,43 @@ export default function InvitationView({ user, compact = false }: InvitationView
                         style={{ maxHeight: compact ? '300px' : '400px' }}
                         onError={(e) => {
                             console.error('Public image URL failed to load, trying API fallback');
-                            // Get the current image source
-                            const currentSrc = (e.target as HTMLImageElement).src;
-                            // Check if we're already using the API fallback
+                            const imgElement = e.target as HTMLImageElement;
+                            const currentSrc = imgElement.src;
+
+                            // If already using API fallback, show SweetAlert to regenerate
                             if (currentSrc.includes('/api/invites/')) {
-                                console.error('Both image sources failed to load');
-                                (e.target as HTMLImageElement).style.border = '2px solid red';
-                                (e.target as HTMLImageElement).style.padding = '10px';
-                                (e.target as HTMLImageElement).alt = 'Image failed to load';
+                                Swal.fire({
+                                    title: 'Image Not Found',
+                                    text: 'The invitation image could not be generated. Please try generating it again.',
+                                    icon: 'error',
+                                    showCancelButton: true,
+                                    confirmButtonText: 'Generate Again',
+                                    cancelButtonText: 'Cancel',
+                                }).then((result) => {
+                                    if (result.isConfirmed) {
+                                        handleRegenerateInvite();
+                                    }
+                                });
                                 return;
                             }
 
                             // Try the API fallback URL
-                            const filename = currentSrc.split('/').pop();
-                            if (filename) {
-                                const fallbackUrl = getApiFallbackUrl(inviteImageUrl || user.inviteImageUrl);
-                                console.log('Trying fallback URL:', fallbackUrl);
-                                (e.target as HTMLImageElement).src = fallbackUrl;
+                            const fallbackUrl = getApiFallbackUrl(inviteImageUrl || user.inviteImageUrl);
+                            if (fallbackUrl) {
+                                imgElement.src = fallbackUrl;
                             } else {
-                                (e.target as HTMLImageElement).alt = 'Image failed to load';
+                                Swal.fire({
+                                    title: 'Image Not Found',
+                                    text: 'The invitation image could not be generated. Please try generating it again.',
+                                    icon: 'error',
+                                    showCancelButton: true,
+                                    confirmButtonText: 'Generate Again',
+                                    cancelButtonText: 'Cancel',
+                                }).then((result) => {
+                                    if (result.isConfirmed) {
+                                        handleRegenerateInvite();
+                                    }
+                                });
                             }
                         }}
                     />

@@ -36,6 +36,8 @@ interface UserData {
 }
 
 export default function DashboardClient({ session, userData }: { session: Session | null, userData: UserData | null }) {
+    usePageViewTracking(); // <-- Call at the top level, not inside useEffect
+
     const [connections, setConnections] = useState<Connection[]>([]);
     const [totalConnections, setTotalConnections] = useState(0);
     const [rankingInfo, setRankingInfo] = useState<RankingInfo>({ rank: 0, tier: 'Newcomer' });
@@ -71,9 +73,6 @@ export default function DashboardClient({ session, userData }: { session: Sessio
     };
 
     useEffect(() => {
-        // Track page view
-        usePageViewTracking();
-
         async function fetchConnections() {
             try {
                 const response = await fetch('/api/user/connections');

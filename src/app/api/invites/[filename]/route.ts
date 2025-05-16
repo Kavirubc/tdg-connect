@@ -8,7 +8,9 @@ export async function GET(
     context: any
 ) {
     try {
-        const filename = context.params.filename;
+        // Await params as required by Next.js App Router
+        const params = await context.params;
+        const filename = params.filename;
 
         // Validate filename to prevent directory traversal
         if (!filename.match(/^[a-zA-Z0-9_-]+\.(png|jpg|jpeg|webp)$/)) {
