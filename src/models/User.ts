@@ -6,7 +6,7 @@ const UserSchema = new Schema({
     password: { type: String, required: true },
     code: { type: String, required: true, unique: true }, // 4-digit code
     phone: { type: String, required: true },
-    nic: { type: String, required: true }, // National Identity Card
+    nic: { type: String }, // National Identity Card (optional)
     organization: { type: String, required: true },
     inviteImageUrl: { type: String }, // URL to the invitation image
     interests: { type: [String], default: [] },
