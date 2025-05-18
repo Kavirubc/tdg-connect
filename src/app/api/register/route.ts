@@ -22,11 +22,23 @@ export async function POST(request: Request) {
     try {
         await connectToDatabase();
 
-        const { name, email, password, phone, nic, organization, interests, facts } = await request.json();
+        const { name, email, password, phone, organization, interests, facts } = await request.json();
 
         // Basic validation
-        if (!name || !email || !password || !phone || !nic || !organization || !interests || !facts) {
+        if (!name || !email || !password || !phone || !organization || !interests || !facts) {
             return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+        }
+
+        // Validate password strength (additional security on server-side)
+        const passwordRegex = /^(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).{8,}$/;
+        if (!passwordRegex.test(password)) {
+            return NextResponse.json({ error: 'Password does not meet strength requirements' }, { status: 400 });
+        }
+
+        // Validate phone number format
+        const phoneRegex = /^\d{10}$/;
+        if (!phoneRegex.test(phone)) {
+            return NextResponse.json({ error: 'Phone number must be exactly 10 digits' }, { status: 400 });
         }
 
         // Check if user already exists
@@ -60,7 +72,6 @@ export async function POST(request: Request) {
             password: hashedPassword,
             code: uniqueCode,
             phone,
-            nic,
             organization,
             interests: interests || [],
             facts: facts || [],
