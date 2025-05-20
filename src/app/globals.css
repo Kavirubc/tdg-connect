@@ -3,7 +3,7 @@
 :root {
   /* Lumo inspired color palette with improved contrast ratios */
   --background: #f4f7fb;
-  --foreground: #060606;
+  --foreground: #7c7c7c;
   --primary: #1c4874;
   --primary-light: #4d6d90;
   --primary-dark: #1d7fe6;
@@ -27,7 +27,7 @@
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #f3f9ff;
-    --foreground: #e4e4e4;
+    --foreground: #444444;
     --primary: #2d6bb8;
     --primary-light: #5689cc;
     --primary-dark: #144a8c;

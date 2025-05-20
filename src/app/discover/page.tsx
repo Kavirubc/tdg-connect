@@ -83,7 +83,7 @@ export default function DiscoverPage() {
                         <img
                             src={formatAvatarUrl(selectedUser.avatarUrl)}
                             alt={selectedUser.name + "'s avatar"}
-                            className="w-24 h-24 rounded-full object-cover mb-4 mx-auto border-2 border-[#7bb5d3]"
+                            className="w-24 h-24 rounded-full object-contain bg-white mb-4 mx-auto border-2 border-[#7bb5d3]"
                             onError={(e) => {
                                 const currentSrc = (e.currentTarget as HTMLImageElement).src;
                                 // If already using API fallback, show default
@@ -203,7 +203,7 @@ export default function DiscoverPage() {
                                     <img
                                         src={formatAvatarUrl(user.avatarUrl)}
                                         alt={user.name + "'s avatar"}
-                                        className="w-12 h-12 rounded-full object-cover border border-gray-200"
+                                        className="w-12 h-12 rounded-full object-contain bg-white border border-gray-200"
                                         onError={(e) => {
                                             const currentSrc = (e.currentTarget as HTMLImageElement).src;
                                             // If already using API fallback, show default
