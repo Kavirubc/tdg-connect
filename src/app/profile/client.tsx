@@ -198,7 +198,7 @@ export default function ProfileClient({ user }: ProfileClientProps) {
                         <img
                             src={formatAvatarUrl(avatarUrl)}
                             alt="Profile Avatar"
-                            className="w-24 h-24 rounded-full object-cover border-2 border-[#7bb5d3]"
+                            className="w-24 h-24 rounded-full object-contain bg-white border-2 border-[#7bb5d3]"
                             onError={e => {
                                 const currentSrc = (e.currentTarget as HTMLImageElement).src;
                                 // If already using API fallback, show default
