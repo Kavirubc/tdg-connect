@@ -6,6 +6,7 @@ import { Session } from "next-auth";
 import { useRouter, usePathname } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
 import useTrackClick from '@/lib/useTrackClick';
+import { motion, AnimatePresence } from "framer-motion";
 
 interface NavigationProps {
     session: Session | null;
@@ -53,37 +54,44 @@ export default function Navigation({ session: serverSession }: NavigationProps) 
     ] : navLinks;
 
     return (
-        <nav className="w-full">
-            <div className="container mx-auto max-w-6xl flex justify-between items-center">
-                <Link href="/" className="text-xl font-bold flex items-center" onClick={trackClick}>
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-6 w-6 mr-2"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                    >
-                        <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+        <nav className="w-full bg-gradient-to-r from-blue-700 to-blue-600 text-white shadow-lg">
+            <div className="container mx-auto max-w-6xl px-4 py-4 flex justify-between items-center">
+                {/* Logo Section */}
+                <Link
+                    href="/"
+                    className="text-xl font-bold flex items-center group"
+                    onClick={trackClick}
+                >
+                    <div className="relative mr-2.5">
+                        <img
+                            src="/rocket.svg"
+                            alt="TDG Connect Logo"
+                            className="h-9 w-9 transition-transform duration-300 group-hover:scale-110 lumo-rocket"
                         />
-                    </svg>
-                    TDG Connect
+                        <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-400 rounded-full border-2 border-blue-700 hidden md:block"></div>
+                    </div>
+                    <span className="text-white font-extrabold tracking-tight">
+                        TDG <span className="text-blue-200">Connect</span>
+                    </span>
                 </Link>
 
                 {/* Desktop Navigation - hidden on mobile */}
-                <div className="hidden md:flex items-center space-x-6">
+                <div className="hidden md:flex items-center space-x-10">
                     {authLinks.map((link) => (
                         <Link
                             key={link.name}
                             href={link.href}
-                            className={`text-white hover:text-gray-200 transition-colors ${pathname === link.href ? 'font-semibold border-b-2 border-white pb-1' : ''
+                            className={`relative group px-1 py-2 text-sm font-medium ${pathname === link.href
+                                ? 'text-white'
+                                : 'text-blue-100 hover:text-white'
                                 }`}
                             onClick={trackClick}
                         >
                             {link.name}
+                            <span className={`absolute bottom-0 left-0 w-full h-0.5 bg-blue-300 rounded-full transform transition-all duration-300 ${pathname === link.href
+                                ? 'scale-x-100 opacity-100'
+                                : 'scale-x-0 opacity-0 group-hover:scale-x-100 group-hover:opacity-75'
+                                }`}></span>
                         </Link>
                     ))}
                 </div>
@@ -91,13 +99,26 @@ export default function Navigation({ session: serverSession }: NavigationProps) 
                 <div className="flex items-center gap-4">
                     {/* Login/Logout button always visible */}
                     {session ? (
-                        <div className="flex items-center">
-                            <span className="hidden md:inline mr-3 text-sm">
-                                Welcome, {session.user?.name || "User"}
+                        <div className="flex items-center gap-3">
+                            <span className="hidden md:flex items-center text-sm font-medium">
+                                <div className="w-8 h-8 rounded-full bg-blue-500 border-2 border-blue-300 flex items-center justify-center overflow-hidden mr-2">
+                                    {session.user?.image ? (
+                                        <img
+                                            src={session.user.image}
+                                            alt={session.user?.name || "User"}
+                                            className="w-full h-full object-cover"
+                                        />
+                                    ) : (
+                                        <span className="text-white text-xs font-bold">
+                                            {session.user?.name?.charAt(0) || "U"}
+                                        </span>
+                                    )}
+                                </div>
+                                <span className="text-blue-100">{session.user?.name || "User"}</span>
                             </span>
                             <button
                                 onClick={e => { trackClick(e); handleSignOut(e); }}
-                                className="community-btn bg-[#d1b89c] hover:bg-[#b29777] text-white px-3 py-1.5 rounded-full text-sm transition-colors"
+                                className="bg-blue-800 hover:bg-blue-900 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 shadow-sm hover:shadow-md focus:ring-2 focus:ring-blue-300 focus:ring-offset-2 focus:ring-offset-blue-700 focus:outline-none"
                                 aria-label="Logout"
                             >
                                 Logout
@@ -106,7 +127,8 @@ export default function Navigation({ session: serverSession }: NavigationProps) 
                     ) : (
                         <Link
                             href="/auth/login"
-                            className="community-btn community-btn-secondary"
+                            className="bg-blue-50 hover:bg-white text-blue-700 font-medium px-5 py-2 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 text-sm focus:ring-2 focus:ring-blue-300 focus:ring-offset-2 focus:ring-offset-blue-700 focus:outline-none"
+                            onClick={trackClick}
                         >
                             Login
                         </Link>
@@ -114,12 +136,13 @@ export default function Navigation({ session: serverSession }: NavigationProps) 
 
                     {/* Hamburger button - visible on mobile only */}
                     <button
-                        className="flex md:hidden items-center p-2"
+                        className="flex md:hidden items-center p-2 rounded-lg hover:bg-blue-800 transition-colors focus:ring-2 focus:ring-blue-300 focus:outline-none"
                         onClick={toggleMenu}
                         aria-label="Toggle menu"
+                        aria-expanded={isMenuOpen}
                     >
                         <svg
-                            className="w-6 h-6"
+                            className="w-6 h-6 text-white"
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"
@@ -145,27 +168,57 @@ export default function Navigation({ session: serverSession }: NavigationProps) 
                 </div>
             </div>
 
-            {/* Mobile Navigation menu - slides down when menu is open */}
+            {/* Mobile Navigation menu with improved animation and style */}
             <div
-                className={`bg-[#7bb5d3] w-full transition-all duration-300 ease-in-out overflow-hidden ${isMenuOpen ? "max-h-96" : "max-h-0"
+                className={`bg-gradient-to-b from-blue-800 to-blue-700 transition-all duration-300 ease-in-out overflow-hidden border-t border-blue-500 ${isMenuOpen ? "max-h-[500px]" : "max-h-0"
                     }`}
             >
-                <div className="flex flex-col p-4 space-y-3 container mx-auto max-w-6xl">
+                <div className="flex flex-col space-y-1 container mx-auto max-w-6xl px-4 py-3">
                     {authLinks.map((link) => (
                         <Link
                             key={link.name}
                             href={link.href}
-                            className={`text-white hover:text-gray-200 transition-colors text-lg ${pathname === link.href ? 'font-semibold' : ''
+                            className={`relative rounded-xl p-3 transition-all duration-200 flex items-center ${pathname === link.href
+                                ? 'bg-blue-900/50 font-medium text-white'
+                                : 'text-blue-100 hover:bg-blue-900/30 hover:text-white'
                                 }`}
                             onClick={(e) => { trackClick(e); setIsMenuOpen(false); }}
                         >
+                            <div className={`w-1.5 h-1.5 rounded-full mr-3 ${pathname === link.href ? 'bg-blue-300' : 'bg-blue-400/50'
+                                }`}></div>
                             {link.name}
                         </Link>
                     ))}
-                    {/* Mobile-only welcome message */}
+
+                    {/* Mobile-only profile section */}
                     {session && (
-                        <div className="md:hidden flex pt-3 border-t border-white/20">
-                            <span>Welcome, {session.user?.name || "User"}</span>
+                        <div className="mt-4 pt-3 border-t border-blue-600/50 flex items-center justify-between">
+                            <div className="flex items-center">
+                                <div className="w-10 h-10 rounded-full bg-blue-600 border-2 border-blue-400 flex items-center justify-center overflow-hidden mr-3">
+                                    {session.user?.image ? (
+                                        <img
+                                            src={session.user.image}
+                                            alt={session.user?.name || "User"}
+                                            className="w-full h-full object-cover"
+                                        />
+                                    ) : (
+                                        <span className="text-white text-xs font-bold">
+                                            {session.user?.name?.charAt(0) || "U"}
+                                        </span>
+                                    )}
+                                </div>
+                                <div className="flex flex-col">
+                                    <span className="text-sm font-medium text-white">{session.user?.name || "User"}</span>
+                                    <span className="text-xs text-blue-200 truncate max-w-[150px]">{session.user?.email || ""}</span>
+                                </div>
+                            </div>
+                            <button
+                                onClick={e => { trackClick(e); handleSignOut(e); }}
+                                className="bg-blue-900 hover:bg-blue-950 px-3 py-2 rounded-lg text-xs font-medium"
+                                aria-label="Logout"
+                            >
+                                Logout
+                            </button>
                         </div>
                     )}
                 </div>
