@@ -232,7 +232,7 @@ export default function InvitationView({ user, compact = false }: InvitationView
                                 type="button"
                                 className="px-4 py-2 bg-[#7bb5d3] text-white rounded-r-md hover:bg-[#5a9cbf] transition-colors text-sm font-medium flex items-center gap-1"
                                 onClick={() => {
-                                    const caption = `I'm excited to join Daily Grind Season 3! ☕️ Let's connect and grow together on May 27th at Sysco LABS. #DailyGrindS3 #productivity [Tag @dailygrind.lk or your favorite Daily Grind social media!]`;
+                                    const caption = `I'm excited to join Daily Grind Season 3! ☕️ Let's connect and grow together on May 27th at Sysco LABS. #DailyGrindS3 #productivity [Tag Daily Grind social media!]`;
                                     navigator.clipboard.writeText(caption);
                                     Swal.fire({
                                         toast: true,
