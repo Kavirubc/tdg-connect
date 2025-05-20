@@ -153,7 +153,7 @@ export default async function Home() {
       </section>
 
       {/* Features Section with cards */}
-      <section className="py-20 bg-[#f0f5fb]">
+      <section className="py-20">
         <div className="max-w-6xl mx-auto px-4">
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-6 text-[#2f78c2]">A Glimpse of what TDG Connect Offers</h2>
           <p className="text-lg text-gray-600 text-center mb-16 max-w-3xl mx-auto">Discover how our platform can transform your community experience</p>

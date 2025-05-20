@@ -215,9 +215,46 @@ export default function InvitationView({ user, compact = false }: InvitationView
                         }}
                     />
                     <p className="text-gray-600 mb-4">Share this image on social media with the hashtag <span className="font-bold">#DailyGrindS3</span></p>
+
+                    {/* Social Media Caption Section - Improved UI and Caption */}
+                    <div className="mb-6 flex flex-col items-center w-full">
+                        <label className="font-semibold text-gray-700 mb-2 text-base">Suggested Social Media Caption</label>
+                        <div className="flex w-full max-w-2xl">
+                            <textarea
+                                readOnly
+                                rows={2}
+                                value={`I'm excited to join Daily Grind Season 3! ☕️ Let's connect and grow together on May 27th at Sysco LABS. #DailyGrindS3 #productivity [Tag Daily Grind social media!]`}
+                                className="flex-1 px-3 py-2 border border-gray-300 rounded-l-md text-gray-700 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#7bb5d3] text-sm resize-none"
+                                id="invitation-caption-input"
+                                style={{ minHeight: '48px' }}
+                            />
+                            <button
+                                type="button"
+                                className="px-4 py-2 bg-[#7bb5d3] text-white rounded-r-md hover:bg-[#5a9cbf] transition-colors text-sm font-medium flex items-center gap-1"
+                                onClick={() => {
+                                    const caption = `I'm excited to join Daily Grind Season 3! ☕️ Let's connect and grow together on May 27th at Sysco LABS. #DailyGrindS3 #productivity [Tag @dailygrind.lk or your favorite Daily Grind social media!]`;
+                                    navigator.clipboard.writeText(caption);
+                                    Swal.fire({
+                                        toast: true,
+                                        position: 'top-end',
+                                        icon: 'success',
+                                        title: 'Caption copied!',
+                                        showConfirmButton: false,
+                                        timer: 1200
+                                    });
+                                }}
+                                aria-label="Copy Caption"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16h8M8 12h8m-8-4h8M4 6h16M4 10h16M4 14h16M4 18h16" /></svg>
+                                Copy
+                            </button>
+                        </div>
+                        <span className="text-xs text-gray-500 mt-1">Tip: Tag <span className="font-semibold">@dailygrind.lk</span> or your favorite Daily Grind social media page!</span>
+                    </div>
+
                     <div className="flex flex-wrap gap-4 justify-center">
                         <a
-                            href={formatImageUrl(inviteImageUrl || user.inviteImageUrl)}
+                            href={getApiFallbackUrl(inviteImageUrl || user.inviteImageUrl)}
                             onClick={trackClick}
                             download="daily-grind-invitation.png"
                             className="bg-[#7bb5d3] text-white py-2 px-6 rounded-full hover:bg-[#5a9cbf] transition-all transform hover:scale-105 shadow-md flex items-center"
