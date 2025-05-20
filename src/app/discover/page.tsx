@@ -67,9 +67,9 @@ export default function DiscoverPage() {
 
     if (selectedUser) {
         return (
-            <div className="max-w-lg mx-auto mt-8 p-6 bg-white rounded-lg shadow-md">
+            <div className="max-w-lg mx-auto mt-8 lumo-card p-6">
                 <button
-                    className="mb-4 text-[#7bb5d3] hover:text-[#5a9cbf] flex items-center font-medium"
+                    className="mb-4 lumo-btn text-[#7bb5d3] hover:text-[#5a9cbf] flex items-center font-medium bg-white"
                     onClick={trackClick}
                     aria-label="Back to Discover"
                 >
@@ -134,7 +134,7 @@ export default function DiscoverPage() {
                     </h3>
                     <div className="flex flex-wrap gap-2">
                         {selectedUser.interests?.map((interest, i) => (
-                            <span key={i} className="px-3 py-1 bg-[#e6f2ff] text-[#7bb5d3] rounded-full text-sm">
+                            <span key={i} className="lumo-tag">
                                 {interest}
                             </span>
                         ))}
@@ -143,7 +143,7 @@ export default function DiscoverPage() {
 
                 {selectedUser._id !== currentUserId ? (
                     <button
-                        className="w-full py-3 px-4 bg-[#7bb5d3] hover:bg-[#5a9cbf] text-white rounded-lg font-medium flex items-center justify-center transition-colors"
+                        className="lumo-btn lumo-btn-primary w-full py-3 px-4 rounded-lg font-medium flex items-center justify-center transition-colors"
                         onClick={e => { trackClick(e); handleSeeYouSoon(selectedUser._id); }}
                         disabled={seeYouSoon[selectedUser._id]}
                         aria-label="See You There"
@@ -172,23 +172,18 @@ export default function DiscoverPage() {
 
     return (
         <div className="max-w-4xl mx-auto px-4 pb-12 pt-8">
-            <div className="bg-gradient-to-r from-[#7bb5d3] to-[#5a95b5] text-white p-6 rounded-lg mb-8 shadow-md">
-                <h1 className="text-3xl font-bold mb-2">Discover People</h1>
-                <p className="mb-4 opacity-90">Connect with other attendees before the event.</p>
-
-                <div className="relative">
-                    <input
-                        type="text"
-                        value={searchQuery}
-                        onChange={e => setSearchQuery(e.target.value)}
-                        placeholder="Search by name, organization, or interests..."
-                        className="w-full p-3 pl-10 rounded-lg text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#d1b89c]"
-                    />
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 absolute top-3.5 left-3 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
+            {/* Hero banner - new UI design */}
+            <section className="relative overflow-hidden rounded-xl bg-gradient-to-r from-[#2f78c2] to-[#31b3e3] text-white shadow-lg mb-8">
+                <div className="absolute inset-0 opacity-10 pointer-events-none select-none">
+                    <img src="/grid-bg.svg" alt="Grid background" className="w-full h-full object-cover" />
                 </div>
-            </div>
+                <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6 p-8 md:p-12">
+                    <div>
+                        <h1 className="text-4xl md:text-5xl font-extrabold mb-2 tracking-tight drop-shadow">Discover People</h1>
+                        <p className="text-white/90 max-w-lg text-lg md:text-xl font-medium drop-shadow">Connect with other attendees before the event.</p>
+                    </div>
+                </div>
+            </section>
 
             {loading ? (
                 <div className="flex justify-center items-center py-12">
@@ -199,7 +194,7 @@ export default function DiscoverPage() {
                     {filteredUsers.map((user) => (
                         <div
                             key={user._id}
-                            className="p-4 bg-white rounded-lg shadow hover:shadow-lg cursor-pointer transition-shadow"
+                            className="lumo-card p-4 bg-white rounded-lg shadow hover:shadow-lg cursor-pointer transition-shadow"
                             onClick={e => { trackClick(e); setSelectedUser(user); }}
                             aria-label={`User Card: ${user.name}`}
                         >
@@ -237,11 +232,10 @@ export default function DiscoverPage() {
                                     <p className="text-sm text-[#5a95b5]">{user.organization}</p>
                                 </div>
                             </div>
-
                             {user.interests.length > 0 && (
                                 <div className="flex flex-wrap gap-1 mt-2">
                                     {user.interests.slice(0, 3).map((interest, i) => (
-                                        <span key={i} className="px-2 py-0.5 bg-[#e6f2ff] text-[#7bb5d3] rounded-full text-xs">
+                                        <span key={i} className="lumo-tag">
                                             {interest}
                                         </span>
                                     ))}
@@ -252,7 +246,6 @@ export default function DiscoverPage() {
                                     )}
                                 </div>
                             )}
-
                             <div className="mt-3 text-right">
                                 <span className="text-[#7bb5d3] text-sm inline-flex items-center">
                                     View Profile
@@ -265,7 +258,7 @@ export default function DiscoverPage() {
                     ))}
                 </div>
             ) : (
-                <div className="text-center py-12 bg-white rounded-lg shadow-sm">
+                <div className="text-center py-12 lumo-card bg-white rounded-lg shadow-sm">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 mx-auto text-gray-300 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
@@ -274,7 +267,7 @@ export default function DiscoverPage() {
                     {searchQuery && (
                         <button
                             onClick={trackClick}
-                            className="mt-4 text-[#7bb5d3] hover:text-[#5a9cbf] font-medium"
+                            className="mt-4 lumo-btn text-[#7bb5d3] hover:text-[#5a9cbf] font-medium bg-white"
                             aria-label="Clear Search"
                         >
                             Clear Search

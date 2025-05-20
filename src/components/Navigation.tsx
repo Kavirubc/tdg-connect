@@ -40,94 +40,84 @@ export default function Navigation({ session: serverSession }: NavigationProps) 
 
     const trackClick = useTrackClick();
 
+    // Remove Profile from nav links
     const navLinks = [
         { name: "Home", href: "/" },
         { name: "Dashboard", href: "/dashboard" },
         { name: "Connections", href: "/connections" },
         { name: "Discover", href: "/discover" },
     ];
-
-    // Add conditional links based on auth state
-    const authLinks = session ? [
-        ...navLinks,
-        { name: "Profile", href: "/profile" },
-    ] : navLinks;
+    const authLinks = navLinks;
 
     return (
-        <nav className="w-full bg-gradient-to-r from-blue-700 to-blue-600 text-white shadow-lg">
-            <div className="container mx-auto max-w-6xl px-4 py-4 flex justify-between items-center">
+        <nav className="w-full bg-[var(--color-background)] text-[var(--color-foreground)] border-b border-[var(--primary-light)]">
+            <div className="container mx-auto max-w-6xl px-4 py-3 flex justify-between items-center">
                 {/* Logo Section */}
                 <Link
                     href="/"
-                    className="text-xl font-bold flex items-center group"
+                    className="flex items-center gap-2 group"
                     onClick={trackClick}
                 >
-                    <div className="relative mr-2.5">
-                        <img
-                            src="/rocket.svg"
-                            alt="TDG Connect Logo"
-                            className="h-9 w-9 transition-transform duration-300 group-hover:scale-110 lumo-rocket"
-                        />
-                        <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-400 rounded-full border-2 border-blue-700 hidden md:block"></div>
-                    </div>
-                    <span className="text-white font-extrabold tracking-tight">
-                        TDG <span className="text-blue-200">Connect</span>
+                    <img
+                        src="/rocket.svg"
+                        alt="TDG Connect Logo"
+                        className="h-7 w-7 lumo-rocket"
+                    />
+                    <span className="text-lg font-bold tracking-tight" style={{ color: 'var(--primary)' }}>
+                        TDG <span style={{ color: 'var(--accent)' }}>Connect</span>
                     </span>
                 </Link>
 
                 {/* Desktop Navigation - hidden on mobile */}
-                <div className="hidden md:flex items-center space-x-10">
+                <div className="hidden md:flex items-center space-x-7">
                     {authLinks.map((link) => (
                         <Link
                             key={link.name}
                             href={link.href}
-                            className={`relative group px-1 py-2 text-sm font-medium ${pathname === link.href
-                                ? 'text-white'
-                                : 'text-blue-100 hover:text-white'
+                            className={`px-1 py-2 text-sm font-medium transition-colors duration-150 ${pathname === link.href
+                                ? 'text-[var(--primary-dark)] border-b-2 border-[var(--primary-dark)]'
+                                : 'text-[var(--primary-light)] hover:text-[var(--primary-dark)] hover:border-b-2 hover:border-[var(--primary-dark)] border-b-2 border-transparent'
                                 }`}
                             onClick={trackClick}
                         >
                             {link.name}
-                            <span className={`absolute bottom-0 left-0 w-full h-0.5 bg-blue-300 rounded-full transform transition-all duration-300 ${pathname === link.href
-                                ? 'scale-x-100 opacity-100'
-                                : 'scale-x-0 opacity-0 group-hover:scale-x-100 group-hover:opacity-75'
-                                }`}></span>
                         </Link>
                     ))}
                 </div>
 
-                <div className="flex items-center gap-4">
-                    {/* Login/Logout button always visible */}
+                <div className="flex items-center gap-3">
+                    {/* User icon with dropdown for profile/logout if logged in */}
                     {session ? (
-                        <div className="flex items-center gap-3">
-                            <span className="hidden md:flex items-center text-sm font-medium">
-                                <div className="w-8 h-8 rounded-full bg-blue-500 border-2 border-blue-300 flex items-center justify-center overflow-hidden mr-2">
-                                    {session.user?.image ? (
-                                        <img
-                                            src={session.user.image}
-                                            alt={session.user?.name || "User"}
-                                            className="w-full h-full object-cover"
-                                        />
-                                    ) : (
-                                        <span className="text-white text-xs font-bold">
-                                            {session.user?.name?.charAt(0) || "U"}
-                                        </span>
-                                    )}
+                        <div className="relative flex items-center gap-2">
+                            <span className="hidden md:flex items-center text-sm font-medium cursor-pointer group" tabIndex={0}>
+                                {session.user?.image ? (
+                                    <img
+                                        src={session.user.image}
+                                        alt={session.user?.name || 'User'}
+                                        className="w-8 h-8 rounded-full object-cover mr-2 border border-[var(--primary-light)]"
+                                    />
+                                ) : (
+                                    <span className="w-8 h-8 rounded-full bg-[var(--primary-light)] flex items-center justify-center text-white text-xs font-bold mr-2">
+                                        {session.user?.name?.charAt(0) || 'U'}
+                                    </span>
+                                )}
+                                {/* Dropdown on hover/focus */}
+                                <div className="absolute right-0 top-10 z-20 hidden group-focus-within:flex group-hover:flex flex-col min-w-[160px] bg-[var(--card-bg)] border border-[var(--primary-light)] rounded shadow-md animate-fadeIn">
+                                    <Link href="/profile" className="px-4 py-2 text-sm text-[var(--primary)] hover:bg-[var(--primary-light)]/10 transition-colors">Profile</Link>
+                                    <button
+                                        onClick={e => { trackClick(e); handleSignOut(e); }}
+                                        className="px-4 py-2 text-sm text-left text-[var(--primary)] hover:bg-[var(--primary-light)]/10 transition-colors"
+                                        aria-label="Logout"
+                                    >
+                                        Logout
+                                    </button>
                                 </div>
-                                <span className="text-blue-100">{session.user?.name || "User"}</span>
                             </span>
-                            <button
-                                onClick={e => { trackClick(e); handleSignOut(e); }}
-                                className="bg-blue-800 hover:bg-blue-900 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 shadow-sm hover:shadow-md focus:ring-2 focus:ring-blue-300 focus:ring-offset-2 focus:ring-offset-blue-700 focus:outline-none"
-                                aria-label="Logout"
-                            >
-                                Logout
-                            </button>
                         </div>
                     ) : (
                         <Link
                             href="/auth/login"
-                            className="bg-blue-50 hover:bg-white text-blue-700 font-medium px-5 py-2 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 text-sm focus:ring-2 focus:ring-blue-300 focus:ring-offset-2 focus:ring-offset-blue-700 focus:outline-none"
+                            className="lumo-btn lumo-btn-primary text-sm px-5 py-2"
                             onClick={trackClick}
                         >
                             Login
@@ -136,13 +126,13 @@ export default function Navigation({ session: serverSession }: NavigationProps) 
 
                     {/* Hamburger button - visible on mobile only */}
                     <button
-                        className="flex md:hidden items-center p-2 rounded-lg hover:bg-blue-800 transition-colors focus:ring-2 focus:ring-blue-300 focus:outline-none"
+                        className="flex md:hidden items-center p-2 rounded focus:ring-2 focus:ring-[var(--primary)] focus:outline-none"
                         onClick={toggleMenu}
                         aria-label="Toggle menu"
                         aria-expanded={isMenuOpen}
                     >
                         <svg
-                            className="w-6 h-6 text-white"
+                            className="w-6 h-6 text-[var(--primary)]"
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"
@@ -168,57 +158,57 @@ export default function Navigation({ session: serverSession }: NavigationProps) 
                 </div>
             </div>
 
-            {/* Mobile Navigation menu with improved animation and style */}
+            {/* Mobile Navigation menu */}
             <div
-                className={`bg-gradient-to-b from-blue-800 to-blue-700 transition-all duration-300 ease-in-out overflow-hidden border-t border-blue-500 ${isMenuOpen ? "max-h-[500px]" : "max-h-0"
-                    }`}
+                className={`bg-[var(--color-background)] transition-all duration-200 overflow-hidden border-t border-[var(--primary-light)] ${isMenuOpen ? 'max-h-[400px]' : 'max-h-0'}`}
             >
                 <div className="flex flex-col space-y-1 container mx-auto max-w-6xl px-4 py-3">
                     {authLinks.map((link) => (
                         <Link
                             key={link.name}
                             href={link.href}
-                            className={`relative rounded-xl p-3 transition-all duration-200 flex items-center ${pathname === link.href
-                                ? 'bg-blue-900/50 font-medium text-white'
-                                : 'text-blue-100 hover:bg-blue-900/30 hover:text-white'
+                            className={`rounded p-3 transition-colors duration-150 flex items-center text-base font-medium ${pathname === link.href
+                                ? 'text-[var(--primary-dark)]'
+                                : 'text-[var(--primary-light)] hover:text-[var(--primary-dark)]'
                                 }`}
                             onClick={(e) => { trackClick(e); setIsMenuOpen(false); }}
                         >
-                            <div className={`w-1.5 h-1.5 rounded-full mr-3 ${pathname === link.href ? 'bg-blue-300' : 'bg-blue-400/50'
-                                }`}></div>
                             {link.name}
                         </Link>
                     ))}
 
-                    {/* Mobile-only profile section */}
+                    {/* Mobile-only user icon with dropdown */}
                     {session && (
-                        <div className="mt-4 pt-3 border-t border-blue-600/50 flex items-center justify-between">
-                            <div className="flex items-center">
-                                <div className="w-10 h-10 rounded-full bg-blue-600 border-2 border-blue-400 flex items-center justify-center overflow-hidden mr-3">
-                                    {session.user?.image ? (
-                                        <img
-                                            src={session.user.image}
-                                            alt={session.user?.name || "User"}
-                                            className="w-full h-full object-cover"
-                                        />
-                                    ) : (
-                                        <span className="text-white text-xs font-bold">
-                                            {session.user?.name?.charAt(0) || "U"}
-                                        </span>
-                                    )}
-                                </div>
-                                <div className="flex flex-col">
-                                    <span className="text-sm font-medium text-white">{session.user?.name || "User"}</span>
-                                    <span className="text-xs text-blue-200 truncate max-w-[150px]">{session.user?.email || ""}</span>
-                                </div>
+                        <div className="mt-4 pt-3 border-t border-[var(--primary-light)] flex items-center">
+                            {session.user?.image ? (
+                                <img
+                                    src={session.user.image}
+                                    alt={session.user?.name || 'User'}
+                                    className="w-9 h-9 rounded-full object-cover mr-3 border border-[var(--primary-light)]"
+                                />
+                            ) : (
+                                <span className="w-9 h-9 rounded-full bg-[var(--primary-light)] flex items-center justify-center text-white text-xs font-bold mr-3">
+                                    {session.user?.name?.charAt(0) || 'U'}
+                                </span>
+                            )}
+                            <div className="flex flex-col flex-1 min-w-0">
+                                <span className="text-sm font-medium truncate" style={{ color: 'var(--primary)' }}>{session.user?.name || 'User'}</span>
+                                <span className="text-xs text-[var(--accent-light)] truncate max-w-[150px]">{session.user?.email || ''}</span>
                             </div>
                             <button
                                 onClick={e => { trackClick(e); handleSignOut(e); }}
-                                className="bg-blue-900 hover:bg-blue-950 px-3 py-2 rounded-lg text-xs font-medium"
+                                className="lumo-btn lumo-btn-primary text-xs px-3 py-2 ml-2"
                                 aria-label="Logout"
                             >
                                 Logout
                             </button>
+                            <Link
+                                href="/profile"
+                                className="lumo-btn lumo-btn-primary text-xs px-3 py-2 ml-2"
+                                onClick={trackClick}
+                            >
+                                Profile
+                            </Link>
                         </div>
                     )}
                 </div>

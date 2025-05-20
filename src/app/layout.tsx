@@ -37,13 +37,13 @@ export default async function RootLayout({
       >
         <SessionProvider>
           <PostHogAnalyticsProvider>
-            <header className="bg-gradient-to-r from-[#2f78c2] to-[#31b3e3] text-white p-4 shadow-md sticky top-0 z-50">
+            <header className="bg-[var(--color-background)] text-[var(--color-foreground)]  sticky top-0 z-50 py-2">
               <Navigation session={session} />
             </header>
             <main className="container mx-auto max-w-6xl px-4 py-6 flex-grow lumo-fade-in">
               {children}
             </main>
-            <footer className="py-8 bg-[#f0f5fb] text-[#333333] border-t border-[#e2e8f0]">
+            <footer className="py-8 bg-[var(--color-background)] text-[var(--color-foreground)] border-t border-[var(--primary-light)]">
               <div className="container mx-auto max-w-6xl px-4">
                 <div className="flex flex-col md:flex-row justify-between items-center">
                   <div className="flex items-center mb-4 md:mb-0">
@@ -57,7 +57,7 @@ export default async function RootLayout({
                     <span className="font-semibold text-[#2f78c2]">TDG Connect</span>
                   </div>
                   <div className="text-center md:text-right">
-                    <p className="text-sm">© {new Date().getFullYear()} <Link href="https://kaviru.cc" className="text-[#2f78c2] hover:text-[#155ba5] transition-colors">Kaviru H | TDG Connect</Link></p>
+                    <p className="text-sm text-black">© {new Date().getFullYear()} <Link target="_blank" href="https://kaviru.cc" className="text-[#2f78c2] hover:text-[#155ba5] transition-colors">Kaviru H | TDG Connect</Link></p>
                     <p className="text-xs text-gray-500 mt-1">Building communities together, one connection at a time</p>
                   </div>
                 </div>

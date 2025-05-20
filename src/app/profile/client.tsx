@@ -169,41 +169,30 @@ export default function ProfileClient({ user }: ProfileClientProps) {
     };
 
     return (
-        <div className="space-y-8">
-            {/* Hero banner */}
-            <div className="relative overflow-hidden rounded-xl bg-gradient-to-r from-[#7bb5d3] to-[#5a95b5] text-white">
-                <div className="absolute inset-0 opacity-10">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
-                        <defs>
-                            <pattern id="pattern" width="40" height="40" patternUnits="userSpaceOnUse">
-                                <path d="M0 20 L40 20" stroke="currentColor" strokeWidth="0.5" />
-                                <path d="M20 0 L20 40" stroke="currentColor" strokeWidth="0.5" />
-                            </pattern>
-                        </defs>
-                        <rect width="100%" height="100%" fill="url(#pattern)" />
-                    </svg>
+        <div className="space-y-8 lumo-fade-in">
+            {/* Hero banner - new UI design */}
+            <section className="relative overflow-hidden rounded-xl bg-gradient-to-r from-[#2f78c2] to-[#31b3e3] text-white shadow-lg mb-8">
+                <div className="absolute inset-0 opacity-10 pointer-events-none select-none">
+                    <img src="/grid-bg.svg" alt="Grid background" className="w-full h-full object-cover" />
                 </div>
-                <div className="relative p-8 md:p-10">
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-                        <div>
-                            <h1 className="text-3xl font-bold mb-2">Your Profile</h1>
-                            <p className="text-white/80 max-w-lg">Manage your personal information and preferences.</p>
-                        </div>
-                        <Link
-                            href="/dashboard"
-                            className="bg-white text-[#5a95b5] py-3 px-6 rounded-full hover:bg-opacity-90 transition-all transform hover:scale-105 shadow-md flex items-center justify-center whitespace-nowrap font-medium"
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                                <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
-                            </svg>
-                            Go to Dashboard
-                        </Link>
+                <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6 p-8 md:p-12">
+                    <div>
+                        <h1 className="text-4xl md:text-5xl font-extrabold mb-2 tracking-tight drop-shadow">Your Profile</h1>
+                        <p className="text-white/90 max-w-lg text-lg md:text-xl font-medium drop-shadow">Manage your personal information and preferences.</p>
                     </div>
+                    <Link
+                        href="/dashboard"
+                        className="lumo-btn bg-white text-[#2f78c2] py-3 px-6 rounded-full hover:bg-opacity-90 transition-all transform hover:scale-105 shadow-md flex items-center justify-center whitespace-nowrap font-semibold text-lg"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
+                        </svg>
+                        Go to Dashboard
+                    </Link>
                 </div>
-            </div>
-
+            </section>
             {/* Avatar Section */}
-            <div className="community-card p-6 border border-gray-100 flex items-center gap-6">
+            <div className="lumo-card p-6 border border-gray-100 flex items-center gap-6">
                 <div>
                     {avatarUrl ? (
                         <img
@@ -253,7 +242,7 @@ export default function ProfileClient({ user }: ProfileClientProps) {
                     </div>
                     <button
                         onClick={handleGenerateAvatar}
-                        className="bg-[#7bb5d3] text-white px-4 py-2 rounded hover:bg-[#5a9cbf] disabled:opacity-50"
+                        className="lumo-btn lumo-btn-primary px-4 py-2 rounded disabled:opacity-50"
                         disabled={!avatarPrompt.trim() || avatarPromptAttempts >= 3 || avatarLoading}
                     >
                         {avatarLoading ? 'Generating...' : 'Generate Avatar'}
@@ -266,10 +255,9 @@ export default function ProfileClient({ user }: ProfileClientProps) {
                     {avatarError && <div className="text-red-600 text-xs mt-1">{avatarError}</div>}
                 </div>
             </div>
-
             {/* Profile Information */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="community-card p-6 border border-gray-100">
+                <div className="lumo-card p-6 border border-gray-100">
                     <div className="flex items-center mb-6">
                         <div className="bg-[#e6f2ff] p-3 rounded-full mr-4">
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-[#7bb5d3]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -281,7 +269,6 @@ export default function ProfileClient({ user }: ProfileClientProps) {
                             <div className="text-2xl font-bold text-[#333333]">Personal Details</div>
                         </div>
                     </div>
-
                     <div className="space-y-4">
                         <div>
                             <label className="block text-sm font-medium text-gray-500 mb-1">Name</label>
@@ -296,7 +283,6 @@ export default function ProfileClient({ user }: ProfileClientProps) {
                                 <div className="p-3 bg-gray-50 rounded-lg">{name}</div>
                             )}
                         </div>
-
                         <div>
                             <label className="block text-sm font-medium text-gray-500 mb-1">Email</label>
                             {isEditing ? (
@@ -310,7 +296,6 @@ export default function ProfileClient({ user }: ProfileClientProps) {
                                 <div className="p-3 bg-gray-50 rounded-lg">{email}</div>
                             )}
                         </div>
-
                         <div>
                             <label className="block text-sm font-medium text-gray-500 mb-1">Connection Code</label>
                             <div className="p-3 bg-gray-50 rounded-lg font-mono flex items-center justify-between">
@@ -324,12 +309,11 @@ export default function ProfileClient({ user }: ProfileClientProps) {
                                 </button>
                             </div>
                         </div>
-
                         <div className="flex justify-end">
                             {isEditing ? (
                                 <button
                                     onClick={e => { trackClick(e); handleSave(); }}
-                                    className="bg-[#7bb5d3] text-white py-2 px-6 rounded-full hover:bg-[#5a9cbf] transition-all transform hover:scale-105 shadow-md"
+                                    className="lumo-btn lumo-btn-primary py-2 px-6 rounded-full shadow-md"
                                     disabled={saveStatus === 'saving'}
                                     aria-label="Save Changes"
                                 >
@@ -347,8 +331,7 @@ export default function ProfileClient({ user }: ProfileClientProps) {
                         </div>
                     </div>
                 </div>
-
-                <div className="community-card p-6 border border-gray-100">
+                <div className="lumo-card p-6 border border-gray-100">
                     <div className="flex items-center mb-6">
                         <div className="bg-[#f9f0e6] p-3 rounded-full mr-4">
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-[#d1b89c]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -360,7 +343,6 @@ export default function ProfileClient({ user }: ProfileClientProps) {
                             <div className="text-2xl font-bold text-[#333333]">Tags & Topics</div>
                         </div>
                     </div>
-
                     <div className="space-y-4">
                         <div className="flex flex-wrap gap-2 min-h-[2.5rem] items-center">
                             {interests.length === 0 ? (
@@ -369,7 +351,7 @@ export default function ProfileClient({ user }: ProfileClientProps) {
                                 interests.map((interest, index) => (
                                     <span
                                         key={index}
-                                        className="px-3 py-1 bg-[#e6f2ff] text-[#7bb5d3] rounded-full text-sm flex items-center"
+                                        className="lumo-tag flex items-center"
                                     >
                                         {interest}
                                         {isEditing && (
@@ -391,7 +373,7 @@ export default function ProfileClient({ user }: ProfileClientProps) {
                                 className="flex gap-2"
                                 onSubmit={e => {
                                     e.preventDefault();
-                                    trackClick(); // No event for form submit
+                                    trackClick();
                                     if (
                                         newInterest.trim() &&
                                         !interests.includes(newInterest.trim())
@@ -410,7 +392,7 @@ export default function ProfileClient({ user }: ProfileClientProps) {
                                 />
                                 <button
                                     type="submit"
-                                    className="bg-[#7bb5d3] text-white py-3 px-6 rounded-lg hover:bg-[#5a9cbf] transition-all"
+                                    className="lumo-btn lumo-btn-primary py-3 px-6 rounded-lg"
                                     disabled={
                                         !newInterest.trim() ||
                                         interests.includes(newInterest.trim())
@@ -424,14 +406,12 @@ export default function ProfileClient({ user }: ProfileClientProps) {
                     </div>
                 </div>
             </div>
-
             {saveStatus === 'success' && (
                 <div className="mt-2 text-green-600 text-sm">Profile updated successfully!</div>
             )}
             {saveStatus === 'error' && saveError && (
                 <div className="mt-2 text-red-600 text-sm">{saveError}</div>
             )}
-
             {/* Daily Grind Invitation */}
             <InvitationView user={user} />
         </div>
