@@ -60,7 +60,18 @@ export async function POST(req: NextRequest) {
         await user.save();
         await connection.save();
 
-        return NextResponse.json({ message: 'Connection recorded successfully' });
+        // Return the connected user's public data for client use
+        return NextResponse.json({
+            message: 'Connection recorded successfully',
+            connection: {
+                _id: connection._id,
+                name: connection.name,
+                code: connection.code,
+                email: connection.email,
+                interests: connection.interests,
+                isDisconnected: false
+            }
+        });
     } catch (error) {
         console.error(error);
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
