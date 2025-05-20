@@ -168,7 +168,7 @@ export async function generateInviteImage(userName: string): Promise<{ filePath:
     // Event location with icon
     ctx.fillStyle = '#5a95b5'; // primary-dark color
     ctx.font = 'bold 36px Arial';
-    ctx.fillText('At Sysco Labs', size / 2, size - 100);
+    ctx.fillText('At Sysco LABS', size / 2, size - 100);
 
     // Add an artistic decorative element
     ctx.strokeStyle = '#d1b89c'; // accent color

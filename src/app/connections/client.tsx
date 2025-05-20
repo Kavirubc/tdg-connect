@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Swal from 'sweetalert2';
 import { trackConnectionCreated } from '@/lib/posthog';
 import useTrackClick from '@/lib/useTrackClick';
+import Image from 'next/image';
 
 interface Connection {
   _id: string;
@@ -203,56 +204,11 @@ export default function ConnectionClient({ userCode }: ConnectionClientProps) {
     }
   };
 
-  const shareEmail = async (connectionId: string) => {
-    // Confirm before sharing email
-    const result = await Swal.fire({
-      title: 'Share Email?',
-      text: "Your email will be shared with this connection. Continue?",
-      icon: 'question',
-      showCancelButton: true,
-      confirmButtonColor: '#7bb5d3',
-      cancelButtonColor: '#d33',
-      confirmButtonText: 'Yes, share email'
-    });
+  const copyCode = () => {
+    navigator.clipboard.writeText(userCode);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
 
-    if (!result.isConfirmed) return;
-
-    try {
-      const response = await fetch('/api/connections/share-email', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ connectionId }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to share email');
-      }
-
-      setSharedEmails(prev => ({
-        ...prev,
-        [connectionId]: true
-      }));
-
-      Swal.fire({
-        title: 'Shared',
-        text: 'Email shared successfully',
-        icon: 'success',
-        confirmButtonColor: '#7bb5d3'
-      });
-    } catch (error) {
-      console.error('Error sharing email:', error);
-      Swal.fire({
-        title: 'Error',
-        text: 'Failed to share email',
-        icon: 'error',
-        confirmButtonColor: '#7bb5d3'
-      });
-    }
-  };
-
-  const copyCode = async () => {
-    trackClick();
-    await navigator.clipboard.writeText(userCode);
     Swal.fire({
       toast: true,
       position: 'top-end',
@@ -263,47 +219,80 @@ export default function ConnectionClient({ userCode }: ConnectionClientProps) {
     });
   };
 
+  const shareViaEmail = async (connectionId: string, connectionName: string) => {
+    try {
+      const response = await fetch(`/api/connections/share-email`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ connectionId }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to send email');
+      }
+
+      setSharedEmails(prev => ({
+        ...prev,
+        [connectionId]: true
+      }));
+
+      Swal.fire({
+        title: 'Email Sent!',
+        text: `Your contact information has been shared with ${connectionName}.`,
+        icon: 'success',
+        confirmButtonColor: '#2f78c2'
+      });
+    } catch (error) {
+      console.error('Error sharing via email:', error);
+      Swal.fire({
+        title: 'Error',
+        text: 'Failed to share via email',
+        icon: 'error',
+        confirmButtonColor: '#2f78c2'
+      });
+    }
+  };
+
   return (
-    <div className="space-y-8">
-      {/* Hero banner */}
-      <div className="relative overflow-hidden rounded-xl bg-gradient-to-r from-[#7bb5d3] to-[#5a95b5] text-white">
+    <div className="space-y-8 lumo-fade-in">
+      {/* Hero section */}
+      <div className="relative overflow-hidden rounded-xl bg-gradient-to-r from-[#2f78c2] to-[#31b3e3] text-white">
         <div className="absolute inset-0 opacity-10">
-          <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
-            <defs>
-              <pattern id="pattern" width="40" height="40" patternUnits="userSpaceOnUse">
-                <path d="M0 20 L40 20" stroke="currentColor" strokeWidth="0.5" />
-                <path d="M20 0 L20 40" stroke="currentColor" strokeWidth="0.5" />
-              </pattern>
-            </defs>
-            <rect width="100%" height="100%" fill="url(#pattern)" />
-          </svg>
+          <Image
+            src="/grid-bg.svg"
+            alt="Grid background"
+            fill
+            style={{ objectFit: 'cover' }}
+          />
         </div>
         <div className="relative p-8 md:p-10">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div>
               <h1 className="text-3xl font-bold mb-2">Your Connections</h1>
-              <p className="text-white/80 max-w-lg">Manage your network and make new connections.</p>
+              <p className="text-white/80 max-w-lg">Manage your network and build meaningful relationships.</p>
             </div>
-            <Link
-              href="/dashboard"
-              className="bg-white text-[#5a95b5] py-3 px-6 rounded-full hover:bg-opacity-90 transition-all transform hover:scale-105 shadow-md flex items-center justify-center whitespace-nowrap font-medium"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
-              </svg>
-              Go to Dashboard
-            </Link>
+            <div className="flex flex-wrap gap-4">
+              <Link
+                href="/discover"
+                className="lumo-btn bg-white text-[#2f78c2] py-3 px-6 rounded-full hover:bg-opacity-90 transition-all transform hover:scale-105 shadow-md flex items-center justify-center whitespace-nowrap font-medium"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M9 9a2 2 0 114 0 2 2 0 01-4 0z" />
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a4 4 0 00-3.446 6.032l-2.261 2.26a1 1 0 101.414 1.415l2.261-2.261A4 4 0 1011 5z" clipRule="evenodd" />
+                </svg>
+                Discover People
+              </Link>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Stats cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
         {/* Your code section */}
-        <div className="community-card p-6 border border-gray-100">
+        <div className="lumo-card p-6 border border-gray-100">
           <div className="flex items-center mb-4">
-            <div className="bg-[#e6f2ff] p-3 rounded-full mr-4">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-[#7bb5d3]" viewBox="0 0 20 20" fill="currentColor">
+            <div className="bg-[#81b6f1]/20 p-3 rounded-full mr-4">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-[#2f78c2]" viewBox="0 0 20 20" fill="currentColor">
                 <path d="M10 2a5 5 0 00-5 5v2a2 2 0 00-2 2v5a2 2 0 002 2h10a2 2 0 002-2v-5a2 2 0 00-2-2H7V7a3 3 0 116 0v2h2V7a5 5 0 00-5-5z" />
               </svg>
             </div>
@@ -314,19 +303,19 @@ export default function ConnectionClient({ userCode }: ConnectionClientProps) {
             </div>
           </div>
           <button
-            className="mt-2 w-full py-2 border border-[#7bb5d3] text-[#7bb5d3] rounded-md text-sm hover:bg-[#e6f2ff] transition-colors"
+            className="mt-2 w-full py-2 border border-[#2f78c2] text-[#2f78c2] rounded-md text-sm hover:bg-[#81b6f1]/20 transition-colors"
             onClick={copyCode}
             aria-label="Copy Code"
           >
-            Copy Code
+            {copied ? 'Copied!' : 'Copy Code'}
           </button>
         </div>
 
         {/* Record connection section */}
-        <div className="community-card p-6 border border-gray-100">
+        <div className="lumo-card p-6 border border-gray-100">
           <div className="flex items-center mb-4">
-            <div className="bg-[#f9f0e6] p-3 rounded-full mr-4">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-[#d1b89c]" viewBox="0 0 20 20" fill="currentColor">
+            <div className="bg-[#a9e2f5]/20 p-3 rounded-full mr-4">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-[#31b3e3]" viewBox="0 0 20 20" fill="currentColor">
                 <path d="M8 9a3 3 0 100-6 3 3 0 000 6zM8 11a6 6 0 016 6H2a6 6 0 016-6zM16 7a1 1 0 10-2 0v1h-1a1 1 0 100 2h1v1a1 1 0 102 0v-1h1a1 1 0 100-2h-1V7z" />
               </svg>
             </div>
@@ -355,14 +344,14 @@ export default function ConnectionClient({ userCode }: ConnectionClientProps) {
                 placeholder="Enter 4-digit code"
                 value={connectionCode}
                 onChange={(e) => setConnectionCode(e.target.value)}
-                className="w-full p-4 text-xl border border-[#e6d7c4] rounded-lg focus:ring-2 focus:ring-[#7bb5d3] focus:border-[#7bb5d3]"
+                className="w-full p-4 text-xl border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2f78c2] focus:border-[#2f78c2]"
                 required
               />
             </div>
             <button
               type="submit"
               disabled={isSubmitting}
-              className={`w-full py-3 px-6 rounded-full bg-[#7bb5d3] text-white hover:bg-[#5a9cbf] transition-all transform hover:scale-105 shadow-md font-medium ${isSubmitting ? 'opacity-75 cursor-not-allowed' : ''}`}
+              className={`lumo-btn lumo-btn-primary w-full py-3 px-6 rounded-full transition-all transform hover:scale-105 shadow-md font-medium ${isSubmitting ? 'opacity-75 cursor-not-allowed' : ''}`}
               aria-label="Connect"
             >
               {isSubmitting ? 'Connecting...' : 'Connect'}
@@ -372,10 +361,10 @@ export default function ConnectionClient({ userCode }: ConnectionClientProps) {
       </div>
 
       {/* Connections List */}
-      <div className="community-card p-6 border border-gray-100">
+      <div className="lumo-card p-6 border border-gray-100">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-bold text-[#333333] flex items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-[#7bb5d3]" viewBox="0 0 20 20" fill="currentColor">
+          <h2 className="text-xl font-bold text-[#2f78c2] flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-[#2f78c2]" viewBox="0 0 20 20" fill="currentColor">
               <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z" />
             </svg>
             Your Connections
@@ -384,35 +373,54 @@ export default function ConnectionClient({ userCode }: ConnectionClientProps) {
 
         {isLoading ? (
           <div className="p-12 text-center">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-[#7bb5d3]"></div>
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-[#2f78c2]"></div>
             <p className="mt-4 text-[#777777]">Loading your connections...</p>
           </div>
         ) : connections.length === 0 ? (
           <div className="text-center py-12">
-            <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-[#e6f2ff] flex items-center justify-center">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-[#7bb5d3]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-[#81b6f1]/20 flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-[#2f78c2]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
               </svg>
             </div>
             <p className="text-[#555555] mb-4">You haven&apos;t connected with anyone yet.</p>
-            <p className="text-[#777777]">Share your code with others to start building your network!</p>
+            <p className="text-[#777777] mb-6">Share your code with others to start building your network!</p>
+            <Link
+              href="/discover"
+              className="lumo-btn lumo-btn-accent py-3 px-6 rounded-full shadow-md inline-flex items-center justify-center"
+            >
+              Discover People
+            </Link>
           </div>
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {connections.map((connection) => (
               <div
                 key={connection._id}
-                className={`p-5 border border-gray-100 rounded-lg ${connection.isDisconnected ? 'opacity-70' : ''}`}
+                className="p-5 border border-gray-100 rounded-lg hover:shadow-md transition-all hover:translate-y-[-4px]"
               >
-                <div className="flex items-center mb-3">
-                  <div className="w-12 h-12 bg-[#e6f2ff] rounded-full flex items-center justify-center mr-3">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-[#7bb5d3]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                    </svg>
+                <div className="flex justify-between">
+                  <div className="flex items-center mb-3">
+                    <div className="w-12 h-12 bg-[#81b6f1]/20 rounded-full flex items-center justify-center mr-3">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-[#2f78c2]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-[#333333]">{connection.name}</h3>
+                      <p className="text-[#777777] text-sm">Code: {connection.code}</p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="font-semibold text-[#333333]">{connection.name}</h3>
-                    <p className="text-[#777777] text-sm">Code: {connection.code}</p>
+                  <div className="dropdown relative">
+                    <button
+                      onClick={e => { e.stopPropagation(); trackClick(e); }}
+                      className="p-1.5 hover:bg-gray-100 rounded-full"
+                      aria-label="Connection options"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-500" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
+                      </svg>
+                    </button>
                   </div>
                 </div>
 
@@ -422,7 +430,7 @@ export default function ConnectionClient({ userCode }: ConnectionClientProps) {
                       {connection.interests.slice(0, 3).map((interest: string, i: number) => (
                         <span
                           key={i}
-                          className="px-2 py-1 bg-[#e6f2ff] text-[#7bb5d3] rounded-full text-xs"
+                          className="lumo-tag"
                         >
                           {interest}
                         </span>
@@ -434,46 +442,75 @@ export default function ConnectionClient({ userCode }: ConnectionClientProps) {
                   </div>
                 )}
 
-                <div className="mt-4 space-y-2">
+                <div className="mt-4 grid grid-cols-2 gap-2">
                   <button
-                    className="w-full text-center py-2 px-4 border border-[#7bb5d3] text-[#7bb5d3] rounded-md text-sm hover:bg-[#e6f2ff] transition-colors"
-                    onClick={e => { trackClick(e); generateConversationStarter(connection._id); }}
-                    aria-label="Start Conversation"
-                    disabled={generatingFor === connection._id}
+                    className="py-2 px-4 border border-[#2f78c2] text-[#2f78c2] rounded-md text-sm hover:bg-[#81b6f1]/20 transition-colors flex items-center justify-center"
+                    onClick={() => shareViaEmail(connection._id, connection.name)}
+                    disabled={sharedEmails[connection._id]}
+                    aria-label="Share My Email"
                   >
-                    {generatingFor === connection._id
-                      ? 'Generating...'
-                      : 'Start Conversation'}
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                    {sharedEmails[connection._id] ? 'Shared' : 'Share Email'}
                   </button>
-
-                  {!sharedEmails[connection._id] && (
-                    <button
-                      className="w-full text-center py-2 px-4 border border-[#d1b89c] text-[#d1b89c] rounded-md text-sm hover:bg-[#f9f0e6] transition-colors"
-                      onClick={e => { trackClick(e); shareEmail(connection._id); }}
-                      aria-label="Share Email"
-                    >
-                      Share Email
-                    </button>
-                  )}
-
                   <button
-                    className="w-full text-center py-2 px-4 border border-red-200 text-red-500 rounded-md text-sm hover:bg-red-50 transition-colors"
-                    onClick={e => { trackClick(e); disconnectUser(connection._id); }}
+                    className="py-2 px-4 border border-[#31b3e3] text-[#31b3e3] rounded-md text-sm hover:bg-[#a9e2f5]/20 transition-colors flex items-center justify-center"
+                    onClick={() => generateConversationStarter(connection._id)}
+                    disabled={generatingFor === connection._id}
+                    aria-label="Generate Conversation Starter"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                    </svg>
+                    {generatingFor === connection._id ? 'Generating...' : 'Chat Starter'}
+                  </button>
+                </div>
+
+                {conversationStarters[connection._id] && (
+                  <div className="mt-3 p-3 bg-[#81b6f1]/20 rounded-md">
+                    <p className="text-sm text-[#333333]">{conversationStarters[connection._id]}</p>
+                  </div>
+                )}
+
+                <div className="mt-4 text-right">
+                  <button
+                    onClick={() => disconnectUser(connection._id)}
+                    className="text-red-500 text-xs hover:underline"
                     aria-label="Disconnect"
                   >
                     Disconnect
                   </button>
                 </div>
-
-                {conversationStarters[connection._id] && (
-                  <div className="mt-3 p-3 bg-[#e6f2ff] rounded-md">
-                    <p className="text-sm text-[#333333]">{conversationStarters[connection._id]}</p>
-                  </div>
-                )}
               </div>
             ))}
           </div>
         )}
+      </div>
+
+      {/* Tips Section */}
+      <div className="lumo-card p-6 bg-[#f0f5fb] border border-blue-100">
+        <h3 className="text-lg font-semibold mb-4 text-[#2f78c2]">Tips for Building Connections</h3>
+        <ul className="space-y-2 text-sm text-gray-700">
+          <li className="flex items-start">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-[#31b3e3] mr-2 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+            </svg>
+            Share your code with people you meet to quickly establish connections.
+          </li>
+          <li className="flex items-start">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-[#31b3e3] mr-2 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+            </svg>
+            Use conversation starters to break the ice when meeting new connections.
+          </li>
+          <li className="flex items-start">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-[#31b3e3] mr-2 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+            </svg>
+            Build your network to increase your community rank and status.
+          </li>
+        </ul>
       </div>
     </div>
   );

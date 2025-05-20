@@ -13,6 +13,7 @@
     "bcrypt": "^5.1.1",
     "bcryptjs": "^3.0.2",
     "canvas": "^3.1.0",
+    "framer-motion": "^12.12.1",
     "mongoose": "^8.14.2",
     "next": "15.3.2",
     "next-auth": "^4.24.11",
