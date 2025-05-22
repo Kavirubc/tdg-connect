@@ -238,24 +238,24 @@ export default function DashboardClient({ session, userData }: { session: Sessio
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ connectionId }),
         })
-        .then(response => {
-            if (!response.ok) throw new Error('Failed to share email');
-            setSharedEmails(prev => ({ ...prev, [connectionId]: true }));
-            Swal.fire({
-                title: 'Email Sent!',
-                text: `Your contact information has been shared with ${connectionName}.`,
-                icon: 'success',
-                confirmButtonColor: '#2f78c2'
+            .then(response => {
+                if (!response.ok) throw new Error('Failed to share email');
+                setSharedEmails(prev => ({ ...prev, [connectionId]: true }));
+                Swal.fire({
+                    title: 'Email Sent!',
+                    text: `Your contact information has been shared with ${connectionName}.`,
+                    icon: 'success',
+                    confirmButtonColor: '#2f78c2'
+                });
+            })
+            .catch(() => {
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Failed to share via email',
+                    icon: 'error',
+                    confirmButtonColor: '#2f78c2'
+                });
             });
-        })
-        .catch(() => {
-            Swal.fire({
-                title: 'Error',
-                text: 'Failed to share via email',
-                icon: 'error',
-                confirmButtonColor: '#2f78c2'
-            });
-        });
     }
 
     return (
