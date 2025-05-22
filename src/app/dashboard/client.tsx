@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { Session } from "next-auth";
 import Swal from 'sweetalert2';
@@ -57,6 +57,11 @@ export default function DashboardClient({ session, userData }: { session: Sessio
     const [seeYouSoonIWantLoading, setSeeYouSoonIWantLoading] = useState(true);
 
     const [conversationStarters, setConversationStarters] = useState<Record<string, string[]>>({});
+
+    // Leaderboard state
+    const [leaderboardUsers, setLeaderboardUsers] = useState<any[]>([]);
+    const [leaderboardLoading, setLeaderboardLoading] = useState(true);
+    const [leaderboardError, setLeaderboardError] = useState<string | null>(null);
 
     const trackClick = useTrackClick();
 
@@ -132,6 +137,29 @@ export default function DashboardClient({ session, userData }: { session: Sessio
             }
         }
         fetchSeeYouSoonIWant();
+
+        async function fetchLeaderboard() {
+            setLeaderboardLoading(true);
+            try {
+                const res = await fetch('/api/admin/users');
+                if (!res.ok) throw new Error('Failed to fetch leaderboard');
+                const data = await res.json();
+                // Sort users by total connections (not just active)
+                const sorted = data.users
+                    .map((u: any) => ({
+                        ...u,
+                        totalConnections: (u.connections || []).length,
+                        activeConnections: (u.connections || []).filter((c: any) => !c.isDisconnected).length
+                    }))
+                    .sort((a: any, b: any) => b.totalConnections - a.totalConnections);
+                setLeaderboardUsers(sorted);
+            } catch (err: any) {
+                setLeaderboardError('Failed to load leaderboard');
+            } finally {
+                setLeaderboardLoading(false);
+            }
+        }
+        fetchLeaderboard();
     }, []);
 
     async function generateConversationStarter(connection: Connection) {
@@ -462,6 +490,53 @@ export default function DashboardClient({ session, userData }: { session: Sessio
                             <InvitationView user={userData} compact={true} />
                         </div>
                     )}
+
+                    {/* Leaderboard Card */}
+                    <div className="lumo-card p-6 border border-gray-100 mb-8">
+                        <h2 className="text-xl font-bold text-[#2f78c2] mb-4 flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-[#2f78c2]" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118L2.049 10.1c-.783-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                            </svg>
+                            Community Leaderboard
+                        </h2>
+                        {leaderboardLoading ? (
+                            <div className="py-8 text-center">
+                                <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-[#2f78c2]"></div>
+                                <p className="mt-4 text-[#777777]">Loading leaderboard...</p>
+                            </div>
+                        ) : leaderboardError ? (
+                            <div className="bg-red-50 text-red-700 p-4 rounded-lg">{leaderboardError}</div>
+                        ) : (
+                            <ol className="divide-y divide-gray-100">
+                                {leaderboardUsers.slice(0, 10).map((user, idx) => {
+                                    const isCurrent = session?.user?.email === user.email;
+                                    return (
+                                        <li key={user._id} className={`flex items-center py-3 ${isCurrent ? 'bg-[#e6f2ff]' : ''} rounded-md px-2`}>
+                                            <span className="text-lg font-bold w-8 text-center text-[#2f78c2]">{idx + 1}</span>
+                                            {user.avatarUrl ? (
+                                                <img src={user.avatarUrl} alt={user.name} className="w-10 h-10 rounded-full object-cover border border-gray-200 mx-2" />
+                                            ) : (
+                                                <div className="w-10 h-10 rounded-full bg-[#e6f2ff] flex items-center justify-center border border-gray-200 mx-2">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-[#2f78c2]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                                    </svg>
+                                                </div>
+                                            )}
+                                            <div className="flex-1 min-w-0">
+                                                <div className={`font-semibold truncate ${isCurrent ? 'text-[#2f78c2]' : 'text-[#333333]'}`}>{user.name}</div>
+                                                <div className="text-xs text-gray-500 truncate">{user.organization || user.email}</div>
+                                            </div>
+                                            <span className="ml-4 text-base font-mono text-[#2f78c2]">{user.totalConnections} <span className="text-xs text-gray-500">connections</span></span>
+                                            {user.activeConnections !== user.totalConnections && (
+                                                <span className="ml-2 text-xs text-gray-400">({user.activeConnections} active)</span>
+                                            )}
+                                            {isCurrent && <span className="ml-2 px-2 py-0.5 bg-[#2f78c2] text-white text-xs rounded-full">You</span>}
+                                        </li>
+                                    );
+                                })}
+                            </ol>
+                        )}
+                    </div>
 
                     {/* Connections section */}
                     <div className="lumo-card p-6 border border-gray-100">
