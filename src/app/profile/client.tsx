@@ -22,6 +22,7 @@ interface ProfileClientProps {
         organization?: string;
         avatarUrl?: string;
         avatarPromptAttempts?: number;
+        emailShared?: boolean; // Add emailShared flag
     };
 }
 
@@ -30,7 +31,9 @@ export default function ProfileClient({ user }: ProfileClientProps) {
     const [name, setName] = useState(user.name || '');
     const [email, setEmail] = useState(user.email || '');
     const [interests, setInterests] = useState<string[]>(user.interests || []);
+    const [facts, setFacts] = useState<string[]>(user.facts || []);
     const [newInterest, setNewInterest] = useState('');
+    const [newFact, setNewFact] = useState('');
     const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'success' | 'error'>("idle");
     const [saveError, setSaveError] = useState<string | null>(null);
 
@@ -59,6 +62,17 @@ export default function ProfileClient({ user }: ProfileClientProps) {
         setInterests(interests.filter(i => i !== interest));
     };
 
+    const handleAddFact = () => {
+        if (newFact.trim() && !facts.includes(newFact.trim())) {
+            setFacts([...facts, newFact.trim()]);
+            setNewFact('');
+        }
+    };
+
+    const handleRemoveFact = (fact: string) => {
+        setFacts(facts.filter(f => f !== fact));
+    };
+
     const handleSave = async () => {
         setSaveStatus('saving');
         setSaveError(null);
@@ -66,7 +80,7 @@ export default function ProfileClient({ user }: ProfileClientProps) {
             const response = await fetch('/api/user/profile', {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, email, interests }),
+                body: JSON.stringify({ name, email, interests, facts }),
             });
             if (!response.ok) {
                 const data = await response.json();
@@ -74,11 +88,13 @@ export default function ProfileClient({ user }: ProfileClientProps) {
             }
             const data = await response.json();
             setInterests(data.user.interests || []);
+            setFacts(data.user.facts || []);
             setName(data.user.name || '');
             setEmail(data.user.email || '');
             setSaveStatus('success');
             setIsEditing(false);
             setNewInterest('');
+            setNewFact('');
 
             Swal.fire({
                 title: 'Success!',
@@ -167,6 +183,8 @@ export default function ProfileClient({ user }: ProfileClientProps) {
             });
         }
     };
+
+    const userIsSelf = true; // TODO: Replace with actual check for user ownership
 
     return (
         <div className="space-y-8 lumo-fade-in">
@@ -285,15 +303,10 @@ export default function ProfileClient({ user }: ProfileClientProps) {
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-gray-500 mb-1">Email</label>
-                            {isEditing ? (
-                                <input
-                                    type="email"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#7bb5d3] focus:border-[#7bb5d3]"
-                                />
-                            ) : (
+                            {isEditing || userIsSelf || user.emailShared ? (
                                 <div className="p-3 bg-gray-50 rounded-lg">{email}</div>
+                            ) : (
+                                <div className="p-3 bg-gray-50 rounded-lg italic text-gray-400">Contact info hidden</div>
                             )}
                         </div>
                         <div>
@@ -398,6 +411,80 @@ export default function ProfileClient({ user }: ProfileClientProps) {
                                         interests.includes(newInterest.trim())
                                     }
                                     aria-label="Add Interest"
+                                >
+                                    Add
+                                </button>
+                            </form>
+                        )}
+                    </div>
+                </div>
+                <div className="lumo-card p-6 border border-gray-100">
+                    <div className="flex items-center mb-6">
+                        <div className="bg-[#f9e6e6] p-3 rounded-full mr-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-[#d19c9c]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M12 20a8 8 0 100-16 8 8 0 000 16z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <div className="text-sm font-medium text-gray-500 uppercase tracking-wide">Fun Facts</div>
+                            <div className="text-2xl font-bold text-[#333333]">About You</div>
+                        </div>
+                    </div>
+                    <div className="space-y-4">
+                        <div className="flex flex-wrap gap-2 min-h-[2.5rem] items-center">
+                            {facts.length === 0 ? (
+                                <span className="text-gray-400 text-sm">No fun facts added yet.</span>
+                            ) : (
+                                facts.map((fact, index) => (
+                                    <span
+                                        key={index}
+                                        className="lumo-tag flex items-center bg-[#f9e6e6] text-[#d19c9c]"
+                                    >
+                                        {fact}
+                                        {isEditing && (
+                                            <button
+                                                type="button"
+                                                onClick={() => handleRemoveFact(fact)}
+                                                className="ml-2 text-[#d19c9c] hover:text-[#b97c7c] focus:outline-none"
+                                                aria-label={`Remove ${fact}`}
+                                            >
+                                                ×
+                                            </button>
+                                        )}
+                                    </span>
+                                ))
+                            )}
+                        </div>
+                        {isEditing && (
+                            <form
+                                className="flex gap-2"
+                                onSubmit={e => {
+                                    e.preventDefault();
+                                    trackClick();
+                                    if (
+                                        newFact.trim() &&
+                                        !facts.includes(newFact.trim())
+                                    ) {
+                                        handleAddFact();
+                                    }
+                                }}
+                            >
+                                <input
+                                    type="text"
+                                    value={newFact}
+                                    onChange={e => setNewFact(e.target.value)}
+                                    placeholder="Add new fun fact"
+                                    className="flex-1 p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#d19c9c] focus:border-[#d19c9c]"
+                                    maxLength={64}
+                                />
+                                <button
+                                    type="submit"
+                                    className="lumo-btn bg-[#d19c9c] text-white py-3 px-6 rounded-lg"
+                                    disabled={
+                                        !newFact.trim() ||
+                                        facts.includes(newFact.trim())
+                                    }
+                                    aria-label="Add Fun Fact"
                                 >
                                     Add
                                 </button>

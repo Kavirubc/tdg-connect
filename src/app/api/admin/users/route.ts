@@ -5,6 +5,10 @@ import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
 
 export async function GET() {
+    const session = await getServerSession(authOptions);
+    if (!session || session.user?.email !== 'hapuarachchikaviru@gmail.com') {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
     try {
         // Verify admin password as an additional security layer
         const adminPassword = process.env.ADMIN_PASS;

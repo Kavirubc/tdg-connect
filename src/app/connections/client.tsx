@@ -32,7 +32,7 @@ export default function ConnectionClient({ userCode }: ConnectionClientProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [connections, setConnections] = useState<Connection[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [conversationStarters, setConversationStarters] = useState<Record<string, string>>({});
+  const [conversationStarters, setConversationStarters] = useState<Record<string, string[]>>({});
   const [generatingFor, setGeneratingFor] = useState<string | null>(null);
   const [sharedEmails, setSharedEmails] = useState<Record<string, boolean>>({});
   const [copied, setCopied] = useState(false);
@@ -174,28 +174,28 @@ export default function ConnectionClient({ userCode }: ConnectionClientProps) {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to generate conversation starter');
+        throw new Error('Failed to generate conversation starters');
       }
 
       const data = await response.json();
       setConversationStarters(prev => ({
         ...prev,
-        [connectionId]: data.conversationStarter
+        [connectionId]: data.starters || [],
       }));
 
       Swal.fire({
         toast: true,
         position: 'top-end',
         icon: 'success',
-        title: 'Conversation starter generated!',
+        title: 'Conversation starters generated!',
         showConfirmButton: false,
         timer: 1500
       });
     } catch (error) {
-      console.error('Error generating conversation starter:', error);
+      console.error('Error generating conversation starters:', error);
       Swal.fire({
         title: 'Error',
-        text: 'Failed to generate conversation starter',
+        text: 'Failed to generate conversation starters',
         icon: 'error',
         confirmButtonColor: '#7bb5d3'
       });
@@ -316,7 +316,7 @@ export default function ConnectionClient({ userCode }: ConnectionClientProps) {
           <div className="flex items-center mb-4">
             <div className="bg-[#a9e2f5]/20 p-3 rounded-full mr-4">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-[#31b3e3]" viewBox="0 0 20 20" fill="currentColor">
-                <path d="M8 9a3 3 0 100-6 3 3 0 000 6zM8 11a6 6 0 016 6H2a6 6 0 016-6zM16 7a1 1 0 10-2 0v1h-1a1 1 0 100 2h1v1a1 1 0 102 0v-1h1a1 1 0 100-2h-1V7z" />
+                <path d="M8 9a3 3 0 100-6 3 3 0 000 6zM8 11a6 6 0 016 6H2a6 6 0 016-6zM16 7a1 1 0 10-2 0v1h-1a1 1 0 100 2h1v1a1 1 0 102 0v-1h1a1 1 0 100-2h-1V7a5 5 0 00-5-5z" />
               </svg>
             </div>
             <div>
@@ -408,7 +408,16 @@ export default function ConnectionClient({ userCode }: ConnectionClientProps) {
                     </div>
                     <div>
                       <h3 className="font-semibold text-[#333333]">{connection.name}</h3>
-                      <p className="text-[#777777] text-sm">Code: {connection.code}</p>
+                      <p className="text-[#777777] text-sm">
+                        Code: {connection.code}
+                        {sharedEmails[connection._id] ? (
+                          <span className="ml-2">| Email: {connection.email}</span>
+                        ) : (
+                          <button className="ml-2 text-xs text-[#2f78c2] underline" onClick={() => shareViaEmail(connection._id, connection.name)} disabled={sharedEmails[connection._id]}>
+                            {sharedEmails[connection._id] ? 'Shared' : 'Share Email'}
+                          </button>
+                        )}
+                      </p>
                     </div>
                   </div>
                   <div className="dropdown relative">
@@ -463,13 +472,17 @@ export default function ConnectionClient({ userCode }: ConnectionClientProps) {
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
                     </svg>
-                    {generatingFor === connection._id ? 'Generating...' : 'Chat Starter'}
+                    {generatingFor === connection._id ? 'Generating...' : 'Chat Starters'}
                   </button>
                 </div>
 
-                {conversationStarters[connection._id] && (
+                {conversationStarters[connection._id] && conversationStarters[connection._id].length > 0 && (
                   <div className="mt-3 p-3 bg-[#81b6f1]/20 rounded-md">
-                    <p className="text-sm text-[#333333]">{conversationStarters[connection._id]}</p>
+                    <ul className="list-decimal list-inside space-y-1">
+                      {conversationStarters[connection._id].map((starter, idx) => (
+                        <li key={idx} className="text-sm text-[#333333]">{starter}</li>
+                      ))}
+                    </ul>
                   </div>
                 )}
 

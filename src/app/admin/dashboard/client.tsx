@@ -3,6 +3,9 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import useTrackClick from '@/lib/useTrackClick';
+import dynamic from 'next/dynamic';
+
+const Chart = dynamic(() => import('react-apexcharts'), { ssr: false });
 
 interface Connection {
     _id: string;
@@ -25,15 +28,30 @@ interface User {
     connections: Connection[];
 }
 
+interface Stats {
+    totalUsers: number;
+    totalConnections: number;
+    activeConnections: number;
+    totalFacts: number;
+    totalInterests: number;
+    usersWithAvatar: number;
+    usersWithInvites: number;
+    inviteImageCount: number;
+    eventCount: number;
+    conversationStarterCount: number;
+    earliestUser: string | null;
+    latestUser: string | null;
+    avatarGenerationsByUser: Record<string, number>;
+    conversationStartersByUser: Record<string, number>;
+}
+
 export default function AdminDashboardClient() {
     const [users, setUsers] = useState<User[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [stats, setStats] = useState({
-        totalUsers: 0,
-        totalConnections: 0,
-        activeConnections: 0,
-    });
+    const [stats, setStats] = useState<Stats | null>(null);
+    const [showEmail, setShowEmail] = useState<Record<string, boolean>>({});
+    const [chartType, setChartType] = useState<'bar' | 'pie'>('bar');
 
     const trackClick = useTrackClick();
 
@@ -41,35 +59,28 @@ export default function AdminDashboardClient() {
         async function fetchAllUsers() {
             try {
                 setLoading(true);
-                const response = await fetch('/api/admin/users');
+                const [usersRes, statsRes] = await Promise.all([
+                    fetch('/api/admin/users'),
+                    fetch('/api/admin/stats')
+                ]);
 
-                if (!response.ok) {
+                if (!usersRes.ok) {
                     throw new Error('Failed to fetch user data');
                 }
 
-                const data = await response.json();
-                setUsers(data.users);
+                if (!statsRes.ok) {
+                    throw new Error('Failed to fetch stats');
+                }
 
-                // Calculate stats
-                const totalUsers = data.users.length;
-                let totalConnections = 0;
-                let activeConnections = 0;
+                const usersData = await usersRes.json();
+                const statsData = await statsRes.json();
 
-                data.users.forEach((user: User) => {
-                    totalConnections += user.connections.length;
-                    activeConnections += user.connections.filter(c => !c.isDisconnected).length;
-                });
-
-                // Active connections are counted twice (once for each user)
-                setStats({
-                    totalUsers,
-                    totalConnections,
-                    activeConnections: activeConnections / 2,
-                });
+                setUsers(usersData.users);
+                setStats(statsData);
 
             } catch (err) {
                 console.error('Error fetching users:', err);
-                setError('Failed to load user data');
+                setError('Failed to load admin data');
             } finally {
                 setLoading(false);
             }
@@ -98,20 +109,108 @@ export default function AdminDashboardClient() {
             <div className="bg-blue-50 p-6 rounded-lg shadow-md">
                 <h1 className="text-2xl font-bold text-blue-800 mb-6">Admin Dashboard</h1>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-                    <div className="bg-white p-4 rounded-md shadow">
-                        <h3 className="font-semibold text-gray-500">Total Users</h3>
-                        <p className="text-3xl font-bold">{stats.totalUsers}</p>
-                    </div>
-                    <div className="bg-white p-4 rounded-md shadow">
-                        <h3 className="font-semibold text-gray-500">Total Connections</h3>
-                        <p className="text-3xl font-bold">{stats.totalConnections}</p>
-                    </div>
-                    <div className="bg-white p-4 rounded-md shadow">
-                        <h3 className="font-semibold text-gray-500">Active Connections</h3>
-                        <p className="text-3xl font-bold">{Math.floor(stats.activeConnections)}</p>
-                    </div>
-                </div>
+                {stats && (
+                    <>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                            <div className="bg-white p-4 rounded-md shadow">
+                                <h3 className="font-semibold text-gray-500">Total Users</h3>
+                                <p className="text-3xl font-bold">{stats.totalUsers}</p>
+                            </div>
+                            <div className="bg-white p-4 rounded-md shadow">
+                                <h3 className="font-semibold text-gray-500">Total Connections</h3>
+                                <p className="text-3xl font-bold">{stats.totalConnections}</p>
+                            </div>
+                            <div className="bg-white p-4 rounded-md shadow">
+                                <h3 className="font-semibold text-gray-500">Active Connections</h3>
+                                <p className="text-3xl font-bold">{Math.floor(stats.activeConnections)}</p>
+                            </div>
+                            <div className="bg-white p-4 rounded-md shadow">
+                                <h3 className="font-semibold text-gray-500">Total Facts</h3>
+                                <p className="text-3xl font-bold">{stats.totalFacts}</p>
+                            </div>
+                            <div className="bg-white p-4 rounded-md shadow">
+                                <h3 className="font-semibold text-gray-500">Total Interests</h3>
+                                <p className="text-3xl font-bold">{stats.totalInterests}</p>
+                            </div>
+                            <div className="bg-white p-4 rounded-md shadow">
+                                <h3 className="font-semibold text-gray-500">Users with Avatar</h3>
+                                <p className="text-3xl font-bold">{stats.usersWithAvatar}</p>
+                            </div>
+                            <div className="bg-white p-4 rounded-md shadow">
+                                <h3 className="font-semibold text-gray-500">Users with Invite Image</h3>
+                                <p className="text-3xl font-bold">{stats.usersWithInvites}</p>
+                            </div>
+                            <div className="bg-white p-4 rounded-md shadow">
+                                <h3 className="font-semibold text-gray-500">Invite Images in Folder</h3>
+                                <p className="text-3xl font-bold">{stats.inviteImageCount}</p>
+                            </div>
+                            <div className="bg-white p-4 rounded-md shadow">
+                                <h3 className="font-semibold text-gray-500">Events</h3>
+                                <p className="text-3xl font-bold">{stats.eventCount}</p>
+                            </div>
+                            <div className="bg-white p-4 rounded-md shadow">
+                                <h3 className="font-semibold text-gray-500">Conversation Starters</h3>
+                                <p className="text-3xl font-bold">{stats.conversationStarterCount}</p>
+                            </div>
+                            <div className="bg-white p-4 rounded-md shadow">
+                                <h3 className="font-semibold text-gray-500">First User Joined</h3>
+                                <p className="text-3xl font-bold">{stats.earliestUser ? new Date(stats.earliestUser).toLocaleString() : '-'}</p>
+                            </div>
+                            <div className="bg-white p-4 rounded-md shadow">
+                                <h3 className="font-semibold text-gray-500">Latest User Joined</h3>
+                                <p className="text-3xl font-bold">{stats.latestUser ? new Date(stats.latestUser).toLocaleString() : '-'}</p>
+                            </div>
+                        </div>
+                        <div className="mb-8">
+                            <h2 className="text-lg font-bold mb-2">User Avatar Generations</h2>
+                            {typeof window !== 'undefined' && stats.avatarGenerationsByUser && (
+                                <Chart
+                                    type={chartType}
+                                    options={{
+                                        chart: { id: 'avatar-gen-bar' },
+                                        xaxis: { categories: Object.keys(stats.avatarGenerationsByUser) },
+                                        title: { text: 'Avatar Generations per User' },
+                                    }}
+                                    series={[{
+                                        name: 'Avatar Generations',
+                                        data: Object.values(stats.avatarGenerationsByUser)
+                                    }]}
+                                    width="100%"
+                                    height={320}
+                                />
+                            )}
+                        </div>
+                        <div className="mb-8">
+                            <h2 className="text-lg font-bold mb-2">User Conversation Starters</h2>
+                            {typeof window !== 'undefined' && stats.conversationStartersByUser && (
+                                <Chart
+                                    type={chartType}
+                                    options={{
+                                        chart: { id: 'conv-starters-bar' },
+                                        xaxis: { categories: Object.keys(stats.conversationStartersByUser) },
+                                        title: { text: 'Conversation Starters per User' },
+                                    }}
+                                    series={[{
+                                        name: 'Conversation Starters',
+                                        data: Object.values(stats.conversationStartersByUser)
+                                    }]}
+                                    width="100%"
+                                    height={320}
+                                />
+                            )}
+                        </div>
+                        <div className="mb-4">
+                            <button
+                                className="mr-2 px-4 py-2 bg-blue-600 text-white rounded"
+                                onClick={() => setChartType('bar')}
+                            >Bar</button>
+                            <button
+                                className="px-4 py-2 bg-blue-200 text-blue-800 rounded"
+                                onClick={() => setChartType('pie')}
+                            >Pie</button>
+                        </div>
+                    </>
+                )}
             </div>
 
             <div className="bg-white p-6 rounded-lg shadow-md">
@@ -133,7 +232,11 @@ export default function AdminDashboardClient() {
                             {users.map(user => (
                                 <tr key={user._id} className="hover:bg-gray-50">
                                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{user.name}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.email}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        {showEmail[user._id] ? user.email : (
+                                            <button className="text-xs text-blue-600 underline" onClick={() => setShowEmail(prev => ({ ...prev, [user._id]: true }))}>Show Email</button>
+                                        )}
+                                    </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.code}</td>
                                     <td className="px-6 py-4 text-sm text-gray-500">
                                         {user.interests.length > 0 ? (
@@ -163,6 +266,32 @@ export default function AdminDashboardClient() {
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                         {new Date(user.createdAt).toLocaleDateString()}
                                     </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div className="mb-8">
+                <h2 className="text-lg font-bold mb-2">Individual User Interactions</h2>
+                <div className="overflow-x-auto">
+                    <table className="min-w-full divide-y divide-gray-200">
+                        <thead className="bg-gray-50">
+                            <tr>
+                                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Avatar Generations</th>
+                                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Conversation Starters</th>
+                            </tr>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-gray-200">
+                            {users.map(user => (
+                                <tr key={user._id}>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900">{user.name}</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-500">{user.email}</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-500">{stats?.avatarGenerationsByUser?.[user._id] ?? 0}</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-500">{stats?.conversationStartersByUser?.[user._id] ?? 0}</td>
                                 </tr>
                             ))}
                         </tbody>

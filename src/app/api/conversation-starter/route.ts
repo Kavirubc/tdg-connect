@@ -36,11 +36,18 @@ export async function GET() {
         const connectionUser = randomConnection.user; // This is the populated user object
 
         // Prepare context for OpenAI prompt
-        let prompt = `Generate a brief conversation starter question (5-20 words) for ${connectionUser.name}`;
+        let prompt = `Generate 5 brief conversation starter questions (5-20 words each) for ${connectionUser.name}`;
 
-        // Add interests to the prompt if available
+        // Add interests and fun facts to the prompt if available
+        const allTopics = [];
         if (connectionUser.interests && connectionUser.interests.length > 0) {
-            prompt += ` based on their interests: ${connectionUser.interests.join(', ')}`;
+            allTopics.push(`interests: ${connectionUser.interests.join(', ')}`);
+        }
+        if (connectionUser.facts && connectionUser.facts.length > 0) {
+            allTopics.push(`fun facts: ${connectionUser.facts.join(', ')}`);
+        }
+        if (allTopics.length > 0) {
+            prompt += ` based on their ${allTopics.join(' and ')}`;
         }
 
         // Add shared interests if available
@@ -48,37 +55,38 @@ export async function GET() {
             const commonInterests = user.interests.filter((interest: string) =>
                 connectionUser.interests.includes(interest)
             );
-
             if (commonInterests.length > 0) {
                 prompt += `. Include a reference to your shared interests: ${commonInterests.join(', ')}`;
             }
         }
 
-        // Generate the conversation starter using OpenAI
+        // Generate the conversation starters using OpenAI
         const completion = await openai.chat.completions.create({
             model: "gpt-4o-mini",
             messages: [
                 {
                     role: "system",
-                    content: "You generate brief, engaging conversation starters between 5-20 words. Make them personal and specific to the recipient's interests."
+                    content: "You generate 5 brief, engaging conversation starters between 5-20 words each. Return them as a numbered list. Make them personal and specific to the recipient's interests and fun facts."
                 },
                 {
                     role: "user",
                     content: prompt
                 }
             ],
-            max_tokens: 50,
+            max_tokens: 200,
             temperature: 0.7,
         });
 
-        // Get the generated starter
-        const generatedStarter = completion.choices[0]?.message?.content?.trim() || "How's your day going?";
-
-        // Format the final starter
-        const personalizedStarter = `Ask ${connectionUser.name}: ${generatedStarter}`;
+        // Parse the generated starters as a list
+        const content = completion.choices[0]?.message?.content?.trim() || "1. How's your day going?";
+        const starters = content.split(/\n\s*\d+\.\s*/).filter(Boolean);
+        // If the first item still has a number, remove it
+        if (starters.length && /^\d+\./.test(starters[0])) {
+            starters[0] = starters[0].replace(/^\d+\.\s*/, '');
+        }
 
         return NextResponse.json({
-            starter: personalizedStarter,
+            starters: starters.slice(0, 5),
             connectionName: connectionUser.name
         });
 
@@ -123,11 +131,18 @@ export async function POST(request: Request) {
         const connectionUser = connection.user;
 
         // Prepare context for OpenAI prompt
-        let prompt = `Generate a brief conversation starter question (5-20 words) for ${connectionUser.name}`;
+        let prompt = `Generate 5 brief conversation starter questions (5-20 words each) for ${connectionUser.name}`;
 
-        // Add interests to the prompt if available
+        // Add interests and fun facts to the prompt if available
+        const allTopics = [];
         if (connectionUser.interests && connectionUser.interests.length > 0) {
-            prompt += ` based on their interests: ${connectionUser.interests.join(', ')}`;
+            allTopics.push(`interests: ${connectionUser.interests.join(', ')}`);
+        }
+        if (connectionUser.facts && connectionUser.facts.length > 0) {
+            allTopics.push(`fun facts: ${connectionUser.facts.join(', ')}`);
+        }
+        if (allTopics.length > 0) {
+            prompt += ` based on their ${allTopics.join(' and ')}`;
         }
 
         // Add shared interests if available
@@ -141,31 +156,33 @@ export async function POST(request: Request) {
             }
         }
 
-        // Generate the conversation starter using OpenAI
+        // Generate the conversation starters using OpenAI
         const completion = await openai.chat.completions.create({
             model: "gpt-4o-mini",
             messages: [
                 {
                     role: "system",
-                    content: "You generate brief, engaging conversation starters between 5-20 words. Make them personal and specific to the recipient's interests."
+                    content: "You generate 5 brief, engaging conversation starters between 5-20 words each. Return them as a numbered list. Make them personal and specific to the recipient's interests and fun facts."
                 },
                 {
                     role: "user",
                     content: prompt
                 }
             ],
-            max_tokens: 50,
+            max_tokens: 200,
             temperature: 0.7,
         });
 
-        // Get the generated starter
-        const generatedStarter = completion.choices[0]?.message?.content?.trim() || "How's your day going?";
-
-        // Format the final starter
-        const personalizedStarter = `Ask ${connectionUser.name}: ${generatedStarter}`;
+        // Parse the generated starters as a list
+        const content = completion.choices[0]?.message?.content?.trim() || "1. How's your day going?";
+        const starters = content.split(/\n\s*\d+\.\s*/).filter(Boolean);
+        // If the first item still has a number, remove it
+        if (starters.length && /^\d+\./.test(starters[0])) {
+            starters[0] = starters[0].replace(/^\d+\.\s*/, '');
+        }
 
         return NextResponse.json({
-            conversationStarter: personalizedStarter
+            starters: starters.slice(0, 5)
         });
 
     } catch (error) {
