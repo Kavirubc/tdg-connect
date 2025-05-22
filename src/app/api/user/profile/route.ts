@@ -11,7 +11,7 @@ export async function PATCH(req: NextRequest) {
         if (!session?.user?.id) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
-        const { name, email, interests } = await req.json();
+        const { name, email, interests, facts } = await req.json();
         if (!name || !email) {
             return NextResponse.json({ error: 'Name and email are required' }, { status: 400 });
         }
@@ -19,6 +19,7 @@ export async function PATCH(req: NextRequest) {
             name,
             email,
             interests: Array.isArray(interests) ? interests : [],
+            facts: Array.isArray(facts) ? facts : [],
         };
         const updatedUser = await User.findByIdAndUpdate(
             session.user.id,
@@ -46,4 +47,4 @@ export async function PATCH(req: NextRequest) {
         console.error('Error updating profile:', error);
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
     }
-} 
+}

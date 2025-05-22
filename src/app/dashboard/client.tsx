@@ -56,6 +56,8 @@ export default function DashboardClient({ session, userData }: { session: Sessio
     const [seeYouSoonIWantCount, setSeeYouSoonIWantCount] = useState(0);
     const [seeYouSoonIWantLoading, setSeeYouSoonIWantLoading] = useState(true);
 
+    const [conversationStarters, setConversationStarters] = useState<Record<string, string[]>>({});
+
     const trackClick = useTrackClick();
 
     // Calculate ranking based on total connections
@@ -146,33 +148,34 @@ export default function DashboardClient({ session, userData }: { session: Sessio
             });
 
             if (!response.ok) {
-                throw new Error('Failed to generate conversation starter');
+                throw new Error('Failed to generate conversation starters');
             }
 
             const data = await response.json();
-            setActiveConversationStarter({
-                connectionId: connection._id,
-                text: data.conversationStarter
-            });
+            setConversationStarters(prev => ({
+                ...prev,
+                [connection._id]: data.starters || [],
+            }));
+            setActiveConversationStarter({ connectionId: connection._id, text: '' });
 
             Swal.fire({
                 toast: true,
                 position: 'top-end',
                 icon: 'success',
-                title: 'Conversation starter generated!',
+                title: 'Conversation starters generated!',
                 showConfirmButton: false,
                 timer: 1500
             });
         } catch (err) {
-            console.error('Error generating conversation starter:', err);
+            console.error('Error generating conversation starters:', err);
             setActiveConversationStarter({
                 connectionId: connection._id,
-                text: 'Failed to generate a conversation starter. Please try again.'
+                text: 'Failed to generate conversation starters. Please try again.'
             });
 
             Swal.fire({
                 title: 'Error',
-                text: 'Failed to generate conversation starter',
+                text: 'Failed to generate conversation starters',
                 icon: 'error',
                 confirmButtonColor: '#2f78c2'
             });
@@ -548,6 +551,16 @@ export default function DashboardClient({ session, userData }: { session: Sessio
                                         {activeConversationStarter.connectionId === connection._id && activeConversationStarter.text && (
                                             <div className="mt-3 p-3 bg-[#81b6f1]/20 rounded-md">
                                                 <p className="text-sm text-[#333333]">{activeConversationStarter.text}</p>
+                                            </div>
+                                        )}
+
+                                        {conversationStarters[connection._id] && conversationStarters[connection._id].length > 0 && (
+                                            <div className="mt-3 p-3 bg-[#81b6f1]/20 rounded-md">
+                                                <ul className="list-decimal list-inside space-y-1">
+                                                    {conversationStarters[connection._id].map((starter, idx) => (
+                                                        <li key={idx} className="text-sm text-[#333333]">{starter}</li>
+                                                    ))}
+                                                </ul>
                                             </div>
                                         )}
                                     </div>
