@@ -17,6 +17,7 @@ interface Connection {
     email: string;
     interests: string[];
     isDisconnected?: boolean;
+    emailShared?: boolean;
 }
 
 interface ActiveConversationStarter {
@@ -62,6 +63,8 @@ export default function DashboardClient({ session, userData }: { session: Sessio
     const [leaderboardUsers, setLeaderboardUsers] = useState<any[]>([]);
     const [leaderboardLoading, setLeaderboardLoading] = useState(true);
     const [leaderboardError, setLeaderboardError] = useState<string | null>(null);
+
+    const [sharedEmails, setSharedEmails] = useState<Record<string, boolean>>({});
 
     const trackClick = useTrackClick();
 
@@ -227,6 +230,33 @@ export default function DashboardClient({ session, userData }: { session: Sessio
     };
 
     const activeConnections = connections.filter(conn => !conn.isDisconnected);
+
+    // Update shareViaEmail function to set sharedEmails:
+    function shareViaEmail(connectionId: string, connectionName: string) {
+        fetch(`/api/connections/share-email`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ connectionId }),
+        })
+        .then(response => {
+            if (!response.ok) throw new Error('Failed to share email');
+            setSharedEmails(prev => ({ ...prev, [connectionId]: true }));
+            Swal.fire({
+                title: 'Email Sent!',
+                text: `Your contact information has been shared with ${connectionName}.`,
+                icon: 'success',
+                confirmButtonColor: '#2f78c2'
+            });
+        })
+        .catch(() => {
+            Swal.fire({
+                title: 'Error',
+                text: 'Failed to share via email',
+                icon: 'error',
+                confirmButtonColor: '#2f78c2'
+            });
+        });
+    }
 
     return (
         <div className="space-y-8 lumo-fade-in">
@@ -524,7 +554,9 @@ export default function DashboardClient({ session, userData }: { session: Sessio
                                             )}
                                             <div className="flex-1 min-w-0">
                                                 <div className={`font-semibold truncate ${isCurrent ? 'text-[#2f78c2]' : 'text-[#333333]'}`}>{user.name}</div>
-                                                <div className="text-xs text-gray-500 truncate">{user.organization || user.email}</div>
+                                                <div className="text-xs text-gray-500 truncate">
+                                                    {user.emailShared ? user.email : <span className="italic text-gray-400">Contact info hidden</span>}
+                                                </div>
                                             </div>
                                             <span className="ml-4 text-base font-mono text-[#2f78c2]">{user.totalConnections} <span className="text-xs text-gray-500">connections</span></span>
                                             {user.activeConnections !== user.totalConnections && (
@@ -589,7 +621,16 @@ export default function DashboardClient({ session, userData }: { session: Sessio
                                             </div>
                                             <div>
                                                 <h3 className="font-semibold text-[#333333]">{connection.name}</h3>
-                                                <p className="text-[#777777] text-sm">Code: {connection.code}</p>
+                                                <p className="text-[#777777] text-sm">
+                                                    Code: {connection.code}
+                                                    {sharedEmails[connection._id] ? (
+                                                        <span className="ml-2">| Email: {connection.email}</span>
+                                                    ) : (
+                                                        <button className="ml-2 text-xs text-[#2f78c2] underline" onClick={() => shareViaEmail(connection._id, connection.name)} disabled={sharedEmails[connection._id]}>
+                                                            {sharedEmails[connection._id] ? 'Shared' : 'Share Email'}
+                                                        </button>
+                                                    )}
+                                                </p>
                                             </div>
                                         </div>
 

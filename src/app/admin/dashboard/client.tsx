@@ -34,6 +34,7 @@ export default function AdminDashboardClient() {
         totalConnections: 0,
         activeConnections: 0,
     });
+    const [showEmail, setShowEmail] = useState<Record<string, boolean>>({});
 
     const trackClick = useTrackClick();
 
@@ -133,7 +134,11 @@ export default function AdminDashboardClient() {
                             {users.map(user => (
                                 <tr key={user._id} className="hover:bg-gray-50">
                                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{user.name}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.email}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        {showEmail[user._id] ? user.email : (
+                                            <button className="text-xs text-blue-600 underline" onClick={() => setShowEmail(prev => ({ ...prev, [user._id]: true }))}>Show Email</button>
+                                        )}
+                                    </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.code}</td>
                                     <td className="px-6 py-4 text-sm text-gray-500">
                                         {user.interests.length > 0 ? (

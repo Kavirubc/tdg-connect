@@ -408,7 +408,16 @@ export default function ConnectionClient({ userCode }: ConnectionClientProps) {
                     </div>
                     <div>
                       <h3 className="font-semibold text-[#333333]">{connection.name}</h3>
-                      <p className="text-[#777777] text-sm">Code: {connection.code}</p>
+                      <p className="text-[#777777] text-sm">
+                        Code: {connection.code}
+                        {sharedEmails[connection._id] ? (
+                          <span className="ml-2">| Email: {connection.email}</span>
+                        ) : (
+                          <button className="ml-2 text-xs text-[#2f78c2] underline" onClick={() => shareViaEmail(connection._id, connection.name)} disabled={sharedEmails[connection._id]}>
+                            {sharedEmails[connection._id] ? 'Shared' : 'Share Email'}
+                          </button>
+                        )}
+                      </p>
                     </div>
                   </div>
                   <div className="dropdown relative">

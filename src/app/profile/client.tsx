@@ -22,6 +22,7 @@ interface ProfileClientProps {
         organization?: string;
         avatarUrl?: string;
         avatarPromptAttempts?: number;
+        emailShared?: boolean; // Add emailShared flag
     };
 }
 
@@ -183,6 +184,8 @@ export default function ProfileClient({ user }: ProfileClientProps) {
         }
     };
 
+    const userIsSelf = true; // TODO: Replace with actual check for user ownership
+
     return (
         <div className="space-y-8 lumo-fade-in">
             {/* Hero banner - new UI design */}
@@ -300,15 +303,10 @@ export default function ProfileClient({ user }: ProfileClientProps) {
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-gray-500 mb-1">Email</label>
-                            {isEditing ? (
-                                <input
-                                    type="email"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#7bb5d3] focus:border-[#7bb5d3]"
-                                />
-                            ) : (
+                            {isEditing || userIsSelf || user.emailShared ? (
                                 <div className="p-3 bg-gray-50 rounded-lg">{email}</div>
+                            ) : (
+                                <div className="p-3 bg-gray-50 rounded-lg italic text-gray-400">Contact info hidden</div>
                             )}
                         </div>
                         <div>
