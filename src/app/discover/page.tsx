@@ -23,6 +23,7 @@ export default function DiscoverPage() {
 
     const [users, setUsers] = useState<DiscoverUser[]>([]);
     const [seeYouSoon, setSeeYouSoon] = useState<{ [userId: string]: boolean }>({});
+    const [seeYouSoonMap, setSeeYouSoonMap] = useState<{ [userId: string]: boolean }>({});
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState("");
     const router = useRouter();
@@ -43,6 +44,20 @@ export default function DiscoverPage() {
                 console.error("Error fetching users:", err);
                 setLoading(false);
             });
+        // Fetch users I want to meet (seeYouSoon)
+        async function fetchSeeYouSoonIWant() {
+            try {
+                const res = await fetch('/api/user/see-you-soon-i-want');
+                if (!res.ok) return;
+                const data = await res.json();
+                if (data.users && Array.isArray(data.users)) {
+                    const map: { [userId: string]: boolean } = {};
+                    data.users.forEach((u: any) => { map[u._id] = true; });
+                    setSeeYouSoonMap(map);
+                }
+            } catch { }
+        }
+        fetchSeeYouSoonIWant();
     }, []);
 
     const handleSeeYouSoon = async (userId: string) => {
@@ -145,6 +160,23 @@ export default function DiscoverPage() {
                                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" viewBox="0 0 20 20" fill="currentColor">
                                         <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
                                     </svg>
+                                    {seeYouSoonMap[user._id] ? (
+                                        <button
+                                            className="ml-2 px-2 py-0.5 bg-green-100 text-green-700 rounded-full text-xs font-semibold hover:bg-green-200 transition"
+                                            onClick={async (e) => {
+                                                e.preventDefault();
+                                                await fetch('/api/connections/see-you-soon', {
+                                                    method: 'DELETE',
+                                                    headers: { 'Content-Type': 'application/json' },
+                                                    body: JSON.stringify({ userId: user._id }),
+                                                });
+                                                setSeeYouSoonMap((prev) => ({ ...prev, [user._id]: false }));
+                                            }}
+                                            aria-label="Undo See You There"
+                                        >
+                                            Undo ✓
+                                        </button>
+                                    ) : null}
                                 </span>
                             </div>
                         </Link>
