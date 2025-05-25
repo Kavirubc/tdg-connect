@@ -77,3 +77,60 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+## Docker
+
+To run this project with Docker:
+
+1. Build the Docker image:
+
+```bash
+docker build -t tdg-connect .
+```
+
+2. Run the container (make sure to set environment variables, e.g. with a .env file):
+
+```bash
+docker run --env-file .env.local -p 3000:3000 tdg-connect
+```
+
+- The app will be available at http://localhost:3000
+- Make sure your `.env.local` file is present in the project root and contains all required environment variables (see above).
+
+## Docker with MongoDB
+
+To run this project with Docker and MongoDB:
+
+1. Copy your environment variables to `.env.docker`:
+
+```bash
+cp .env.local .env.docker
+```
+
+2. Edit `.env.docker` and update `MONGODB_URI` to:
+
+```
+MONGODB_URI=mongodb://mongo:27017/tdg-connect
+```
+
+3. Start the application with Docker Compose:
+
+```bash
+docker-compose --env-file .env.docker up --build
+```
+
+This will start both the Next.js app and MongoDB in containers. The app will be available at http://localhost:3000
+
+To stop the containers:
+
+```bash
+docker-compose down
+```
+
+To remove all data (including MongoDB data):
+
+```bash
+docker-compose down -v
+```
+
+---
