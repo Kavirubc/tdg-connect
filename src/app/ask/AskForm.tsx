@@ -1,83 +1,126 @@
 'use client';
-import Swal from 'sweetalert2';
 import { useState } from 'react';
 
-export default function AskForm({ userName }: { userName: string }) {
+interface AskFormProps {
+    userName: string;
+}
+
+export default function AskForm({ userName }: AskFormProps) {
+    const [open, setOpen] = useState(false);
+    const [heading, setHeading] = useState('');
+    const [question, setQuestion] = useState('');
+    const [anonymous, setAnonymous] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState(false);
 
-    // Replace the form with a button to open the modal
+    const headingLimit = 100;
+    const questionLimit = 500;
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!heading.trim() || !question.trim()) {
+            setError('Heading and question are required!');
+            return;
+        }
+        setLoading(true);
+        setError(null);
+        setSuccess(false);
+        const res = await fetch('/api/questions', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ heading, question, anonymous }),
+        });
+        setLoading(false);
+        if (!res.ok) {
+            setError('Failed to post question');
+            return;
+        }
+        setSuccess(true);
+        setOpen(false);
+        setHeading('');
+        setQuestion('');
+        setAnonymous(false);
+        window.location.reload();
+    };
+
     return (
         <>
             <button
-                className="community-btn community-btn-primary w-full mb-8 text-lg py-3 rounded-xl shadow-lg hover:scale-105 transition-transform  font-bold"
-                onClick={async () => {
-                    const { value: formValues } = await Swal.fire({
-                        title: '<span style="color: #2f78c2">Ask a Creative Question</span>',
-                        html: `
-                            <div style="display: flex; flex-direction: column; gap: 1rem;">
-                                <input id="swal-heading" class="swal2-input" placeholder="Heading (e.g. 'Icebreaker')" maxlength="60" />
-                                <textarea id="swal-question" class="swal2-textarea" placeholder="Type your question..." rows="3" maxlength="300" style="resize: vertical;"></textarea>
-                                <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 1rem;">
-                                    <input type="checkbox" id="swal-anonymous" style="width: 1.2em; height: 1.2em;" /> Ask anonymously
-                                </label>
-                            </div>
-                        `,
-                        focusConfirm: false,
-                        showCancelButton: true,
-                        confirmButtonText: 'Post Question',
-                        cancelButtonText: 'Cancel',
-                        preConfirm: () => {
-                            const heading = (document.getElementById('swal-heading') as HTMLInputElement)?.value.trim();
-                            const question = (document.getElementById('swal-question') as HTMLTextAreaElement)?.value.trim();
-                            const anonymous = (document.getElementById('swal-anonymous') as HTMLInputElement)?.checked;
-                            if (!heading || !question) {
-                                Swal.showValidationMessage('Heading and question are required!');
-                                return;
-                            }
-                            return { heading, question, anonymous };
-                        },
-                        customClass: {
-                            popup: 'rounded-2xl',
-                            confirmButton: 'community-btn community-btn-primary',
-                            cancelButton: 'community-btn',
-                        },
-                        background: '#f7fafc',
-                    });
-                    if (formValues) {
-                        setLoading(true);
-                        setError(null);
-                        setSuccess(false);
-                        const res = await fetch('/api/questions', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify(formValues),
-                        });
-                        if (!res.ok) {
-                            setError('Failed to post question');
-                            setLoading(false);
-                            Swal.fire('Error', 'Failed to post question', 'error');
-                            return;
-                        }
-                        setSuccess(true);
-                        setLoading(false);
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Question posted!',
-                            showConfirmButton: false,
-                            timer: 1500,
-                            background: '#f7fafc',
-                        }).then(() => window.location.reload());
-                    }
-                }}
+                className="community-btn community-btn-primary w-full mb-8 text-lg py-3 rounded-xl shadow-lg hover:scale-105 transition-transform bg-gradient-to-r from-[#7bb5d3] to-[#2f78c2] text-white font-bold"
+                onClick={() => setOpen(true)}
+                type="button"
             >
                 <span className="flex items-center gap-2 justify-center">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
                     Ask a Question
                 </span>
             </button>
-            {error && <div className="text-red-500 text-sm text-center mb-2">{error}</div>}
+            {open && (
+                <div className="fixed inset-0 z-50 flex items-start justify-center pt-16">
+                    {/* Blurred background overlay */}
+                    <div className="absolute inset-0 bg-white/10 bg-opacity-40 backdrop-blur-sm transition-all duration-300" onClick={() => setOpen(false)} />
+                    <div className="relative z-10 bg-white rounded-2xl shadow-2xl p-8 w-full max-w-lg animate-fade-in mt-0">
+                        <button
+                            className="absolute top-3 right-3 text-gray-400 hover:text-gray-700 text-2xl font-bold"
+                            onClick={() => setOpen(false)}
+                            aria-label="Close"
+                            type="button"
+                        >
+                            &times;
+                        </button>
+                        <h2 className="text-2xl font-bold text-sky-700 mb-4 text-center">Ask a Question</h2>
+                        <form onSubmit={handleSubmit}>
+                            <div className="mb-4">
+                                <label htmlFor="heading" className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+                                <input
+                                    id="heading"
+                                    type="text"
+                                    className=" text-black w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#7bb5d3] focus:border-[#7bb5d3]"
+                                    placeholder="Heading (e.g. 'Icebreaker')"
+                                    maxLength={headingLimit}
+                                    value={heading}
+                                    onChange={e => setHeading(e.target.value)}
+                                    required
+                                />
+                                <div className={`text-xs mt-1 text-right ${heading.length > headingLimit ? 'text-red-500' : 'text-gray-400'}`}>{heading.length}/{headingLimit}</div>
+                            </div>
+                            <div className="mb-4">
+                                <label htmlFor="question" className="block text-sm font-medium text-gray-700 mb-1">Question</label>
+                                <textarea
+                                    id="question"
+                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#7bb5d3] focus:border-[#7bb5d3] resize-vertical text-black"
+                                    placeholder="Type your question..."
+                                    maxLength={questionLimit}
+                                    rows={4}
+                                    value={question}
+                                    onChange={e => setQuestion(e.target.value)}
+                                    required
+                                />
+                                <div className={`text-xs mt-1 text-right ${question.length > questionLimit ? 'text-red-500' : 'text-gray-400'}`}>{question.length}/{questionLimit}</div>
+                            </div>
+                            <div className="mb-6 flex items-center gap-2">
+                                <input
+                                    type="checkbox"
+                                    id="anonymous"
+                                    checked={anonymous}
+                                    onChange={e => setAnonymous(e.target.checked)}
+                                    className="w-4 h-4"
+                                />
+                                <label htmlFor="anonymous" className="text-gray-700 text-sm">Ask anonymously</label>
+                            </div>
+                            {error && <div className="text-red-500 text-sm text-center mb-2">{error}</div>}
+                            <button
+                                type="submit"
+                                className="community-btn community-btn-primary w-full text-lg py-3 rounded-xl shadow-lg bg-gradient-to-r from-[#7bb5d3] to-[#2f78c2] text-white font-bold disabled:opacity-60"
+                                disabled={loading || heading.length > headingLimit || question.length > questionLimit}
+                            >
+                                {loading ? 'Posting...' : 'Post Question'}
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            )}
             {success && <div className="text-green-600 text-sm text-center mb-2">Question posted!</div>}
         </>
     );

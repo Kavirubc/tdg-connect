@@ -8,7 +8,7 @@ export default async function AskPage() {
     const session = await getServerSession(authOptions);
     if (!session) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-700 flex items-center justify-center p-4 text-white">
+            <div className="min-h-screen flex items-center justify-center p-4 text-white">
                 <div className="bg-slate-800 shadow-2xl rounded-xl p-8 max-w-md w-full text-center">
                     <h1 className="text-3xl font-bold mb-4 text-sky-400">Access Restricted</h1>
                     <p className="mb-6 text-slate-300">Please log in to post your questions or view contributions from the community.</p>
