@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
-import {connectToDatabase} from '@/lib/mongodb';
+import { connectToDatabase } from '@/lib/mongodb';
 import Question from '@/models/Question';
 
 export async function GET() {
@@ -28,4 +28,18 @@ export async function POST(req: Request) {
         anonymous: !!anonymous,
     });
     return NextResponse.json({ question: newQuestion });
+}
+
+export async function DELETE(req: Request) {
+    const session = await getServerSession(authOptions);
+    if (!session || session.user?.email !== 'hapuarachchikaviru@gmail.com') {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    const { id } = await req.json();
+    if (!id) {
+        return NextResponse.json({ error: 'Missing question id' }, { status: 400 });
+    }
+    await connectToDatabase();
+    await Question.findByIdAndDelete(id);
+    return NextResponse.json({ success: true });
 }
