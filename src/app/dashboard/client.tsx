@@ -144,18 +144,10 @@ export default function DashboardClient({ session, userData }: { session: Sessio
         async function fetchLeaderboard() {
             setLeaderboardLoading(true);
             try {
-                const res = await fetch('/api/admin/users');
+                const res = await fetch('/api/leaderboard');
                 if (!res.ok) throw new Error('Failed to fetch leaderboard');
                 const data = await res.json();
-                // Sort users by total connections (not just active)
-                const sorted = data.users
-                    .map((u: any) => ({
-                        ...u,
-                        totalConnections: (u.connections || []).length,
-                        activeConnections: (u.connections || []).filter((c: any) => !c.isDisconnected).length
-                    }))
-                    .sort((a: any, b: any) => b.totalConnections - a.totalConnections);
-                setLeaderboardUsers(sorted);
+                setLeaderboardUsers(data.users);
             } catch (err: any) {
                 setLeaderboardError('Failed to load leaderboard');
             } finally {
