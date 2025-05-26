@@ -46,6 +46,7 @@ export default function Navigation({ session: serverSession }: NavigationProps) 
         { name: "Dashboard", href: "/dashboard" },
         { name: "Connections", href: "/connections" },
         { name: "Discover", href: "/discover" },
+        { name: "Ask", href: "/ask" }, // Added Ask to navigation
     ];
     const authLinks = navLinks;
 
