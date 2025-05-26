@@ -53,7 +53,7 @@ export default async function AskPage() {
                             <div key={q._id} className="bg-slate-800 shadow-xl rounded-lg overflow-hidden transform transition-all hover:scale-[1.02] duration-300">
                                 <div className="p-6">
                                     <h2 className="text-2xl font-bold text-sky-400 mb-3">{q.heading}</h2>
-                                    <p className="text-slate-300 mb-4 leading-relaxed whitespace-pre-wrap">{q.question}</p>
+                                    <p className="text-slate-300 mb-4 leading-relaxed whitespace-pre-wrap break-words">{q.question}</p>
                                     <div className="border-t border-slate-700 pt-4 mt-4 flex items-center justify-between text-sm">
                                         <span className={`font-medium ${q.anonymous ? 'text-teal-400 italic' : 'text-indigo-400'}`}>
                                             {q.anonymous
