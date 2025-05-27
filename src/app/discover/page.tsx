@@ -6,6 +6,7 @@ import { useSession } from "next-auth/react";
 import { formatAvatarUrl, getAvatarApiFallbackUrl } from "@/lib/avatar-utils";
 import { trackDiscoverView, trackSeeYouSoon } from "@/lib/posthog";
 import useTrackClick from '@/lib/useTrackClick';
+import Image from "next/image";
 
 // Add a type for User
 interface DiscoverUser {
@@ -110,23 +111,26 @@ export default function DiscoverPage() {
                         >
                             <div className="flex items-center mb-3">
                                 {user.avatarUrl ? (
-                                    <img
+                                    <Image
                                         src={formatAvatarUrl(user.avatarUrl)}
                                         alt={user.name + "'s avatar"}
+                                        width={48}
+                                        height={48}
                                         className="w-12 h-12 rounded-full object-contain bg-white border border-gray-200"
                                         onError={(e) => {
                                             const currentSrc = (e.currentTarget as HTMLImageElement).src;
                                             if (currentSrc.includes('/api/user/avatar/')) {
-                                                e.currentTarget.src = '/userAvatar/default.png';
+                                                (e.currentTarget as HTMLImageElement).src = '/userAvatar/default.png';
                                                 return;
                                             }
                                             const fallbackUrl = getAvatarApiFallbackUrl(user.avatarUrl);
                                             if (fallbackUrl) {
                                                 (e.currentTarget as HTMLImageElement).src = fallbackUrl;
                                             } else {
-                                                e.currentTarget.src = '/userAvatar/default.png';
+                                                (e.currentTarget as HTMLImageElement).src = '/userAvatar/default.png';
                                             }
                                         }}
+                                        priority={false}
                                     />
                                 ) : (
                                     <div className="w-12 h-12 rounded-full bg-[#e6f2ff] flex items-center justify-center border border-gray-200">
